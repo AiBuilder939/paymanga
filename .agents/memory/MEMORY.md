@@ -1,0 +1,2 @@
+- [Hero stats overlap pattern](hero-stats-pattern.md) — move floating stats outside the hero `<section>` with `-mt-14 z-20` to avoid overflow:hidden clipping; adjust next section with responsive pt-28/md:pt-36.
+- [Cairo font for Kurdish Sorani](cairo-font.md) — use Cairo (not Noto Sans Arabic alone) for Kurdish Sorani; always restore .font-ku/.font-ar/.font-en utility classes alongside [lang=] selectors or English font will not switch correctly.

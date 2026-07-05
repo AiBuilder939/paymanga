@@ -10,7 +10,7 @@ export const t = {
   instituteName: { ku: 'پەیمانگای شار', ar: 'معهد شار', en: 'Shar Institute' },
 
   // Hero
-  heroTagline: { ku: 'مستەقبەلەکەت لێرە دەستپێدەکات', ar: 'مستقبلك يبدأ من هنا', en: 'Your Future Starts Here' },
+  heroTagline: { ku: 'داهاتووت لێرەوە دەستپێدەکات', ar: 'مستقبلك يبدأ من هنا', en: 'Your Future Starts Here' },
   heroSubtitle: { ku: 'پەیمانگای شار بەهترین شوێنە بۆ فێربوون و پەرەپێدانی شارەزاییەکانت لە سەید صادق', ar: 'معهد شار هو المكان الأمثل لتعلم المهارات وتطوير نفسك في سعيد صادق', en: 'Shar Institute is the premier destination for skill development and learning in Said Sadiq' },
   heroCtaEnroll: { ku: 'ئێستا ناونووس بکە', ar: 'سجل الآن', en: 'Enroll Now' },
   heroCtaCourses: { ku: 'کۆرسەکان ببینە', ar: 'استعرض الدورات', en: 'View Courses' },
