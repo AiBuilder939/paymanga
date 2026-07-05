@@ -1,5 +1,6 @@
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
+import { Staff } from '../components/Staff';
 import { Courses } from '../components/Courses';
 import { StatusCheck } from '../components/StatusCheck';
 import { RegistrationForm } from '../components/RegistrationForm';
@@ -11,6 +12,7 @@ export default function Home() {
     <main className="min-h-screen flex flex-col font-sans">
       <Navbar />
       <Hero />
+      <Staff />
       <Courses />
       <StatusCheck />
       <RegistrationForm />
