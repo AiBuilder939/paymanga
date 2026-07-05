@@ -11,7 +11,7 @@ export const t = {
 
   // Hero
   heroTagline: { ku: 'داهاتووت لێرەوە دەستپێدەکات', ar: 'مستقبلك يبدأ من هنا', en: 'Your Future Starts Here' },
-  heroSubtitle: { ku: 'پەیمانگای شار بەهترین شوێنە بۆ فێربوون و پەرەپێدانی شارەزاییەکانت لە سەید صادق', ar: 'معهد شار هو المكان الأمثل لتعلم المهارات وتطوير نفسك في سعيد صادق', en: 'Shar Institute is the premier destination for skill development and learning in Said Sadiq' },
+  heroSubtitle: { ku: 'پەیمانگای شار بەهێزترین شوێنە بۆ فێربوون و پەرەپێدانی شارەزاییەکانت لە سەیدسادق', ar: 'معهد شار هو المكان الأمثل لتعلم المهارات وتطوير نفسك في سعيد صادق', en: 'Shar Institute is the premier destination for skill development and learning in Said Sadiq' },
   heroCtaEnroll: { ku: 'ئێستا ناونووس بکە', ar: 'سجل الآن', en: 'Enroll Now' },
   heroCtaCourses: { ku: 'کۆرسەکان ببینە', ar: 'استعرض الدورات', en: 'View Courses' },
   heroStats1Label: { ku: 'خوێندکار', ar: 'طالب', en: 'Students' },
@@ -23,8 +23,10 @@ export const t = {
 
   // Courses section
   coursesTitle: { ku: 'کۆرسەکانمان', ar: 'دوراتنا', en: 'Our Courses' },
-  coursesSubtitle: { ku: 'کۆرسە پسپۆڕەکانمان هەڵبژێرە و گامێک بەرەو پێشەواتوو بنێ', ar: 'اختر دوراتنا المتخصصة وخذ خطوة نحو المستقبل', en: 'Choose from our specialized courses and take a step toward your future' },
+  coursesSubtitle: { ku: 'باشترین مامۆستا و پرۆگرامی خوێندن بۆ سەرکەوتنی تۆ', ar: 'أفضل المدرسين والبرامج الدراسية لنجاحك', en: 'The best teachers and study programs for your success' },
   enrollButton: { ku: 'ناونووس بکە', ar: 'سجل', en: 'Enroll' },
+  grade12Title: { ku: 'پۆلی دوازدەم', ar: 'الصف الثاني عشر', en: 'Grade 12' },
+  grade12Subtitle: { ku: 'کۆرسی تایبەت بۆ قوتابیانی پۆلی دوازدەم بە باشترین مامۆستاکان', ar: 'دورات متخصصة لطلاب الصف الثاني عشر مع أفضل المدرسين', en: 'Specialized courses for Grade 12 students with the best teachers' },
   durationLabel: { ku: 'ماوە', ar: 'المدة', en: 'Duration' },
 
   // Registration
