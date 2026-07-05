@@ -7,15 +7,15 @@ type Teacher = {
 };
 
 const TEACHERS: Teacher[] = [
-  { name: 'م. لێهسان ساڵح',        subject: 'وانەی کیمیا',    subjectKey: 'chemistry' },
+  { name: 'م. ئیحسان ساڵح',        subject: 'وانەی کیمیا',    subjectKey: 'chemistry' },
   { name: 'م. بەهادین محەمەد',     subject: 'وانەی کیمیا',    subjectKey: 'chemistry' },
   { name: 'م. ئاسۆ شەریف',         subject: 'وانەی زیندەزانی', subjectKey: 'biology' },
   { name: 'م. سەربەست ڕۆستەم',    subject: 'وانەی فیزیا',    subjectKey: 'physics' },
   { name: 'م. بیلال بەکر',         subject: 'وانەی فیزیا',    subjectKey: 'physics' },
   { name: 'م. کامەران عەبدوڵا',    subject: 'وانەی عەرەبی',   subjectKey: 'arabic' },
-  { name: 'م. هێلال سابیر',        subject: 'وانەی عەرەبی',   subjectKey: 'arabic' },
+  { name: 'م. هیلال سابیر',        subject: 'وانەی عەرەبی',   subjectKey: 'arabic' },
   { name: 'م. بەختیار ئەحمەد',     subject: 'وانەی بیرکاری',  subjectKey: 'math' },
-  { name: 'م. کەروان جەمال',       subject: 'وانەی بیرکاری',  subjectKey: 'math' },
+  { name: 'م. کاروان جەمال',       subject: 'وانەی بیرکاری',  subjectKey: 'math' },
   { name: 'م. عەبدوڵا حەمەغەریب', subject: 'وانەی ئینگلیزی', subjectKey: 'english' },
   { name: 'م. بیلال ئەحمەد',       subject: 'وانەی ئینگلیزی', subjectKey: 'english' },
   { name: 'م. ئاکام حسێن',         subject: 'وانەی ئینگلیزی', subjectKey: 'english' },
@@ -95,7 +95,7 @@ export function Staff() {
             باشترین ستافی پۆلی ١٢
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed">
-            مامۆستایانی پسپۆڕ و بەteجربەی خوێندنی پۆلی دوازدەم، ئامادەن بۆ رێنماییکردنت بەرەو سەرکەوتن
+            کۆمەڵێک لە بە ئەزموونترین و بەناوبانگترین مامۆستایانی پۆلی ١٢ لەسەر ئاستی ناوچەکە بۆ گەیشتن بە خەونەکانت.
           </p>
         </div>
 
