@@ -4,18 +4,19 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   useListRegistrations,
   useGetRegistrationStats,
-  useListCourses,
   useAdminLogin,
   useAdminLogout,
   getListRegistrationsQueryKey,
   getGetRegistrationStatsQueryKey,
   setAuthTokenGetter,
 } from '@workspace/api-client-react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { format } from 'date-fns';
 import {
   Lock, ArrowLeft, LogOut,
   Download, Filter,
-  Users, Sun, Moon, CalendarDays, BookOpen
+  Users, Sun, Moon, CalendarDays, BookOpen,
+  CheckCircle2, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,27 +36,45 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+// Extended type includes the status field returned by the API
+type RegWithStatus = {
+  id: number;
+  studentName: string;
+  phoneNumber: string;
+  courseId: string;
+  courseName: string;
+  shift: 'morning' | 'evening';
+  language: 'ku' | 'ar' | 'en';
+  notes?: string | null;
+  submittedAt: Date;
+  status: 'pending' | 'approved';
+};
+
+const GRADE12_COURSES = [
+  { id: 'chemistry',   ku: 'کیمیا',    ar: 'الكيمياء',         en: 'Chemistry' },
+  { id: 'physics',     ku: 'فیزیا',    ar: 'الفيزياء',         en: 'Physics' },
+  { id: 'math',        ku: 'بیرکاری',  ar: 'الرياضيات',        en: 'Mathematics' },
+  { id: 'arabic-g12',  ku: 'عەرەبی',   ar: 'اللغة العربية',    en: 'Arabic' },
+  { id: 'english-g12', ku: 'ئینگلیزی', ar: 'اللغة الإنجليزية', en: 'English' },
+];
+
 export default function Admin() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { t, lang, dir } = useLanguage();
 
-  // Auth state — token lives in memory only, never persisted
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [shiftFilter, setShiftFilter] = useState<string>('all');
-
-  const { data: courses } = useListCourses();
+  const [approvingId, setApprovingId] = useState<number | null>(null);
 
   const adminLogin = useAdminLogin();
   const adminLogout = useAdminLogout();
-
   const isAuthenticated = !!token;
 
-  // Admin data — only fetched when authenticated
-  const { data: registrations, isLoading: loadingRegs } = useListRegistrations(
+  const { data: registrationsRaw, isLoading: loadingRegs } = useListRegistrations(
     {
       courseId: courseFilter !== 'all' ? courseFilter : undefined,
       shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
@@ -71,6 +90,7 @@ export default function Admin() {
       }
     }
   );
+  const registrations = registrationsRaw as unknown as RegWithStatus[] | undefined;
 
   const { data: stats } = useGetRegistrationStats(
     { query: { enabled: isAuthenticated, retry: false, queryKey: getGetRegistrationStatsQueryKey() } }
@@ -89,11 +109,8 @@ export default function Admin() {
           queryClient.invalidateQueries();
         },
         onError: (err: { status?: number }) => {
-          if (err?.status === 429) {
-            setLoginError('Too many failed attempts. Please wait 15 minutes.');
-          } else {
-            setLoginError('Incorrect password. Please try again.');
-          }
+          if (err?.status === 429) setLoginError(t('adminRateLimit'));
+          else setLoginError(t('adminLoginError'));
           setPassword('');
         },
       }
@@ -108,17 +125,39 @@ export default function Admin() {
     queryClient.clear();
   };
 
-  // ---- LOGIN SCREEN ----
+  const handleApprove = async (id: number) => {
+    if (!token) return;
+    setApprovingId(id);
+    try {
+      await fetch(`/api/registrations/${id}/approve`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      queryClient.invalidateQueries({
+        queryKey: getListRegistrationsQueryKey({
+          courseId: courseFilter !== 'all' ? courseFilter : undefined,
+          shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
+        }),
+      });
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  const courseName = (c: typeof GRADE12_COURSES[0]) =>
+    lang === 'ku' ? c.ku : lang === 'ar' ? c.ar : c.en;
+
+  // ── LOGIN ──────────────────────────────────────────────────────────────────
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4" dir={dir}>
         <div className="max-w-md w-full bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
           <div className="p-8 text-center bg-primary">
             <div className="w-16 h-16 rounded-full bg-white/10 text-white flex items-center justify-center mx-auto mb-4">
               <Lock className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Admin Access</h2>
-            <p className="text-primary-foreground/70 mt-2">Enter password to view registrations</p>
+            <h2 className="text-2xl font-black text-white">{t('adminLoginTitle')}</h2>
+            <p className="text-primary-foreground/70 mt-2">{t('adminLoginSubtitle')}</p>
           </div>
 
           <div className="p-8">
@@ -126,7 +165,7 @@ export default function Admin() {
               <div className="space-y-2">
                 <Input
                   type="password"
-                  placeholder="Password"
+                  placeholder={t('adminPassword')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 text-center text-lg"
@@ -138,17 +177,17 @@ export default function Admin() {
                 )}
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full h-12 text-base" disabled={adminLogin.isPending}>
-                  {adminLogin.isPending ? 'Verifying...' : 'Login to Dashboard'}
+                <Button type="submit" className="w-full h-12 text-base font-bold" disabled={adminLogin.isPending}>
+                  {adminLogin.isPending ? t('adminVerifying') : t('adminLoginBtn')}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setLocation('/')}
-                  className="w-full h-12"
+                  className="w-full h-12 gap-2"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Website
+                  <ArrowLeft className="w-4 h-4" />
+                  {t('adminBack')}
                 </Button>
               </div>
             </form>
@@ -158,19 +197,19 @@ export default function Admin() {
     );
   }
 
-  // ---- DASHBOARD SCREEN ----
+  // ── DASHBOARD ──────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
-      {/* Admin Header */}
+    <div className="min-h-screen bg-background" dir={dir}>
+      {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">ش</div>
-            <h1 className="font-bold text-xl">Shar Institute Admin</h1>
+            <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center font-black text-sm">ش</div>
+            <h1 className="font-black text-xl">{t('adminTitle')}</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground hover:text-foreground">
+            <LogOut className="w-4 h-4" />
+            {t('adminLogout')}
           </Button>
         </div>
       </header>
@@ -179,31 +218,31 @@ export default function Admin() {
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
           {[
-            { label: 'Total Registrations', value: stats?.totalRegistrations ?? 0, icon: Users, color: 'bg-blue-100 text-blue-600' },
-            { label: 'Morning Shift', value: stats?.morningCount ?? 0, icon: Sun, color: 'bg-amber-100 text-amber-600' },
-            { label: 'Evening Shift', value: stats?.eveningCount ?? 0, icon: Moon, color: 'bg-indigo-100 text-indigo-600' },
-            { label: 'Last 7 Days', value: stats?.recentRegistrations ?? 0, icon: CalendarDays, color: 'bg-emerald-100 text-emerald-600' },
+            { label: t('adminTotalRegs'),   value: stats?.totalRegistrations ?? 0, icon: Users,       color: 'bg-blue-100 text-blue-600' },
+            { label: t('adminMorningShift'), value: stats?.morningCount ?? 0,       icon: Sun,         color: 'bg-amber-100 text-amber-600' },
+            { label: t('adminEveningShift'), value: stats?.eveningCount ?? 0,        icon: Moon,        color: 'bg-indigo-100 text-indigo-600' },
+            { label: t('adminLast7Days'),    value: stats?.recentRegistrations ?? 0, icon: CalendarDays, color: 'bg-emerald-100 text-emerald-600' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-card border border-border rounded-xl p-5 flex items-center gap-4 shadow-sm">
               <div className={`w-12 h-12 rounded-full ${color} flex items-center justify-center shrink-0`}>
                 <Icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{label}</p>
-                <h3 className="text-2xl font-bold">{value}</h3>
+                <p className="text-sm font-semibold text-muted-foreground">{label}</p>
+                <h3 className="text-2xl font-black">{value}</h3>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Main Content */}
+        {/* Registrations Table */}
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
           {/* Toolbar */}
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/20">
-            <div className="flex items-center gap-4">
-              <h2 className="font-semibold text-lg flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-lg flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-muted-foreground" />
-                Registrations
+                {t('adminRegistrations')}
               </h2>
               <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full">
                 {registrations?.length ?? 0}
@@ -213,92 +252,137 @@ export default function Admin() {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-                <Select value={courseFilter} onValueChange={setCourseFilter}>
+                <Select value={courseFilter} onValueChange={setCourseFilter} dir={dir}>
                   <SelectTrigger className="w-full sm:w-[180px] bg-background">
-                    <SelectValue placeholder="All Courses" />
+                    <SelectValue placeholder={t('adminAllCourses')} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Courses</SelectItem>
-                    {courses?.map(course => (
-                      <SelectItem key={course.id} value={course.id}>{course.nameEn}</SelectItem>
+                  <SelectContent dir={dir}>
+                    <SelectItem value="all">{t('adminAllCourses')}</SelectItem>
+                    {GRADE12_COURSES.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{courseName(c)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <Select value={shiftFilter} onValueChange={setShiftFilter}>
-                <SelectTrigger className="w-full sm:w-[130px] bg-background">
-                  <SelectValue placeholder="All Shifts" />
+              <Select value={shiftFilter} onValueChange={setShiftFilter} dir={dir}>
+                <SelectTrigger className="w-full sm:w-[140px] bg-background">
+                  <SelectValue placeholder={t('adminAllShifts')} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Shifts</SelectItem>
-                  <SelectItem value="morning">Morning</SelectItem>
-                  <SelectItem value="evening">Evening</SelectItem>
+                <SelectContent dir={dir}>
+                  <SelectItem value="all">{t('adminAllShifts')}</SelectItem>
+                  <SelectItem value="morning">{t('adminMorningLabel')}</SelectItem>
+                  <SelectItem value="evening">{t('adminEveningLabel')}</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" size="icon" title="Export (coming soon)" className="shrink-0">
+              <Button variant="outline" size="icon" title="Export" className="shrink-0">
                 <Download className="w-4 h-4" />
               </Button>
             </div>
           </div>
 
-          {/* Data Table */}
+          {/* Table */}
           <div className="overflow-x-auto">
-            <Table>
+            <Table dir={dir}>
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="w-[50px]">#</TableHead>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Phone Number</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Shift</TableHead>
-                  <TableHead>Language</TableHead>
-                  <TableHead>Date Registered</TableHead>
+                  <TableHead className="w-[50px] text-start">{t('adminColNum')}</TableHead>
+                  <TableHead className="text-start">{t('adminColName')}</TableHead>
+                  <TableHead className="text-start">{t('adminColPhone')}</TableHead>
+                  <TableHead className="text-start">{t('adminColCourse')}</TableHead>
+                  <TableHead className="text-start">{t('adminColShift')}</TableHead>
+                  <TableHead className="text-start">{t('adminColLang')}</TableHead>
+                  <TableHead className="text-start">{t('adminColDate')}</TableHead>
+                  <TableHead className="text-start">{t('adminColStatus')}</TableHead>
+                  <TableHead className="text-start">{t('adminColActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingRegs ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        Loading registrations...
+                        {t('adminLoading')}
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : registrations && registrations.length > 0 ? (
                   registrations.map((reg) => (
-                    <TableRow key={reg.id}>
-                      <TableCell className="font-medium text-muted-foreground">{reg.id}</TableCell>
-                      <TableCell className="font-semibold">{reg.studentName}</TableCell>
-                      <TableCell className="font-mono text-sm" dir="ltr">{reg.phoneNumber}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
+                    <TableRow key={reg.id} className="hover:bg-muted/30 transition-colors">
+                      <TableCell className="font-medium text-muted-foreground text-start">{reg.id}</TableCell>
+
+                      <TableCell className="font-semibold text-start">{reg.studentName}</TableCell>
+
+                      <TableCell className="text-start">
+                        <span className="font-mono text-sm" dir="ltr">{reg.phoneNumber}</span>
+                      </TableCell>
+
+                      <TableCell className="text-start">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-bold">
                           {reg.courseName}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          reg.shift === 'morning' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'
+
+                      <TableCell className="text-start">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${
+                          reg.shift === 'morning'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
                         }`}>
-                          {reg.shift === 'morning' ? 'Morning' : 'Evening'}
+                          {reg.shift === 'morning' ? t('adminMorningLabel') : t('adminEveningLabel')}
                         </span>
                       </TableCell>
-                      <TableCell>
+
+                      <TableCell className="text-start">
                         <span className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
-                          {reg.language === 'ku' ? 'Kurdish' : reg.language === 'ar' ? 'Arabic' : 'English'}
+                          {reg.language === 'ku' ? t('adminLangKu') : reg.language === 'ar' ? t('adminLangAr') : t('adminLangEn')}
                         </span>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+
+                      <TableCell className="text-start text-sm text-muted-foreground whitespace-nowrap">
                         {format(new Date(reg.submittedAt), 'MMM dd, yyyy HH:mm')}
+                      </TableCell>
+
+                      <TableCell className="text-start">
+                        {reg.status === 'approved' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {t('adminApproved')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                            {t('adminPending')}
+                          </span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-start">
+                        {reg.status === 'approved' ? (
+                          <span className="text-xs text-muted-foreground font-medium">—</span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 text-xs font-bold border-emerald-400 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors dark:border-emerald-700 dark:text-emerald-400"
+                            disabled={approvingId === reg.id}
+                            onClick={() => handleApprove(reg.id)}
+                          >
+                            {approvingId === reg.id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : t('adminApprove')
+                            }
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                      No registrations found matching the selected filters.
+                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                      {t('adminEmpty')}
                     </TableCell>
                   </TableRow>
                 )}

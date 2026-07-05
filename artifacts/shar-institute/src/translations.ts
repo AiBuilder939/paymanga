@@ -17,7 +17,7 @@ export const t = {
   heroStats1Label: { ku: 'خوێندکار', ar: 'طالب', en: 'Students' },
   heroStats1Value: { ku: '+٥٠٠', ar: '+500', en: '500+' },
   heroStats2Label: { ku: 'کۆرس', ar: 'دورة', en: 'Courses' },
-  heroStats2Value: { ku: '٦', ar: '6', en: '6' },
+  heroStats2Value: { ku: '٥', ar: '5', en: '5' },
   heroStats3Label: { ku: 'مامۆستا', ar: 'مدرس', en: 'Teachers' },
   heroStats3Value: { ku: '+١٠', ar: '+10', en: '10+' },
 
@@ -25,9 +25,9 @@ export const t = {
   coursesTitle: { ku: 'کۆرسەکانمان', ar: 'دوراتنا', en: 'Our Courses' },
   coursesSubtitle: { ku: 'باشترین مامۆستا و پرۆگرامی خوێندن بۆ سەرکەوتنی تۆ', ar: 'أفضل المدرسين والبرامج الدراسية لنجاحك', en: 'The best teachers and study programs for your success' },
   enrollButton: { ku: 'ناونووس بکە', ar: 'سجل', en: 'Enroll' },
+  durationLabel: { ku: 'ماوە', ar: 'المدة', en: 'Duration' },
   grade12Title: { ku: 'پۆلی دوازدەم', ar: 'الصف الثاني عشر', en: 'Grade 12' },
   grade12Subtitle: { ku: 'کۆرسی تایبەت بۆ قوتابیانی پۆلی دوازدەم بە باشترین مامۆستاکان', ar: 'دورات متخصصة لطلاب الصف الثاني عشر مع أفضل المدرسين', en: 'Specialized courses for Grade 12 students with the best teachers' },
-  durationLabel: { ku: 'ماوە', ar: 'المدة', en: 'Duration' },
 
   // Registration
   regTitle: { ku: 'تۆمارکردن', ar: 'التسجيل', en: 'Registration' },
@@ -54,4 +54,57 @@ export const t = {
   // Footer
   footerRights: { ku: 'هەموو مافەکان پارێزراون', ar: 'جميع الحقوق محفوظة', en: 'All rights reserved' },
   footerDesc: { ku: 'پەیمانگای پیشەیی و زمان لە سەید صادق', ar: 'معهد مهني ولغوي في سعيد صادق', en: 'Vocational & language institute in Said Sadiq' },
+
+  // Admin — login
+  adminLoginTitle: { ku: 'دەستپێکردنی بەڕێوەبەری', ar: 'دخول الإدارة', en: 'Admin Access' },
+  adminLoginSubtitle: { ku: 'وشەی نهێنی داخل بکە بۆ بینینی تۆمارکراوەکان', ar: 'أدخل كلمة المرور لعرض التسجيلات', en: 'Enter password to view registrations' },
+  adminLoginBtn: { ku: 'چوونەژوورەوە', ar: 'تسجيل الدخول', en: 'Login to Dashboard' },
+  adminVerifying: { ku: 'پشکنین...', ar: 'جارٍ التحقق...', en: 'Verifying...' },
+  adminLoginError: { ku: 'وشەی نهێنی هەڵەیە. دووبارە هەوڵ بدەرەوە', ar: 'كلمة المرور غير صحيحة. حاول مجدداً', en: 'Incorrect password. Please try again.' },
+  adminRateLimit: { ku: 'زۆر هەوڵی هەڵە. ١٥ خولەک چاوەڕوان بە', ar: 'محاولات كثيرة. انتظر ١٥ دقيقة', en: 'Too many failed attempts. Wait 15 minutes.' },
+  adminBack: { ku: 'گەڕانەوە بۆ مالپەڕ', ar: 'العودة للموقع', en: 'Back to Website' },
+
+  // Admin — dashboard
+  adminTitle: { ku: 'بەڕێوەبەری پەیمانگای شار', ar: 'لوحة تحكم معهد شار', en: 'Shar Institute Admin' },
+  adminLogout: { ku: 'چوونەدەرەوە', ar: 'تسجيل الخروج', en: 'Logout' },
+  adminTotalRegs: { ku: 'کۆی تۆمارکراوەکان', ar: 'إجمالي التسجيلات', en: 'Total Registrations' },
+  adminMorningShift: { ku: 'نۆبەتی بەیانی', ar: 'الفترة الصباحية', en: 'Morning Shift' },
+  adminEveningShift: { ku: 'نۆبەتی ئێوارە', ar: 'الفترة المسائية', en: 'Evening Shift' },
+  adminLast7Days: { ku: 'کۆی ٧ ڕۆژی ڕابردوو', ar: 'آخر 7 أيام', en: 'Last 7 Days' },
+
+  // Admin — table headers
+  adminColNum: { ku: '#', ar: '#', en: '#' },
+  adminColName: { ku: 'ناوی خوێندکار', ar: 'اسم الطالب', en: 'Student Name' },
+  adminColPhone: { ku: 'ژمارەی تەلەفۆن', ar: 'رقم الهاتف', en: 'Phone Number' },
+  adminColCourse: { ku: 'کۆرس', ar: 'الدورة', en: 'Course' },
+  adminColShift: { ku: 'نۆبەت', ar: 'الفترة', en: 'Shift' },
+  adminColLang: { ku: 'زمان', ar: 'اللغة', en: 'Language' },
+  adminColDate: { ku: 'بەرواری تۆمارکردن', ar: 'تاريخ التسجيل', en: 'Date Registered' },
+  adminColStatus: { ku: 'دۆخ', ar: 'الحالة', en: 'Status' },
+  adminColActions: { ku: 'ڕێکارەکان', ar: 'الإجراءات', en: 'Actions' },
+
+  // Admin — actions & status
+  adminApprove: { ku: 'وەرگرتن', ar: 'قبول', en: 'Approve' },
+  adminApproved: { ku: 'وەرگیرا', ar: 'مقبول', en: 'Approved' },
+  adminPending: { ku: 'لەژێر پێداچوونەوەدایە', ar: 'قيد المراجعة', en: 'Under Review' },
+  adminAllCourses: { ku: 'هەموو کۆرسەکان', ar: 'جميع الدورات', en: 'All Courses' },
+  adminAllShifts: { ku: 'هەموو نۆبەتەکان', ar: 'جميع الفترات', en: 'All Shifts' },
+  adminRegistrations: { ku: 'تۆمارکراوەکان', ar: 'التسجيلات', en: 'Registrations' },
+  adminMorningLabel: { ku: 'بەیانی', ar: 'صباحي', en: 'Morning' },
+  adminEveningLabel: { ku: 'ئێوارە', ar: 'مسائي', en: 'Evening' },
+  adminLoading: { ku: 'چاوەڕوانبە...', ar: 'جارٍ التحميل...', en: 'Loading...' },
+  adminEmpty: { ku: 'هیچ تۆمارکراوەیەک نەدۆزرایەوە', ar: 'لا توجد تسجيلات', en: 'No registrations found' },
+  adminLangKu: { ku: 'کوردی', ar: 'الكردية', en: 'Kurdish' },
+  adminLangAr: { ku: 'عەرەبی', ar: 'العربية', en: 'Arabic' },
+  adminLangEn: { ku: 'ئینگلیزی', ar: 'الإنجليزية', en: 'English' },
+  adminPassword: { ku: 'وشەی نهێنی', ar: 'كلمة المرور', en: 'Password' },
+
+  // Status check
+  statusCheckTitle: { ku: 'سەیرکردنی دۆخی تۆمارکردن', ar: 'التحقق من حالة التسجيل', en: 'Check Registration Status' },
+  statusCheckSubtitle: { ku: 'ژمارەی تەلەفۆنت داخل بکە بۆ ئەوەی دۆخی تۆمارکردنەکەت بزانی', ar: 'أدخل رقم هاتفك للتحقق من حالة تسجيلك', en: 'Enter your phone number to check your registration status' },
+  statusCheckBtn: { ku: 'سەیرکردن', ar: 'تحقق', en: 'Check Status' },
+  statusApproved: { ku: 'پیرۆزە! ناوت بە سەرکەوتوویی لە پەیمانگای شار وەرگیرا. لە نزیکترین کاتدا پەیوەندیت پێوە دەکەین.', ar: 'مبروك! تم قبولك بنجاح في معهد شار. سنتصل بك قريباً.', en: 'Congratulations! You have been successfully accepted into Shar Institute. We will contact you soon.' },
+  statusPending: { ku: 'تۆمارکردنەکەت لەژێر پێداچوونەوەدایە. بەم زووانە پەیوەندیت پێوە دەکرێت.', ar: 'تسجيلك قيد المراجعة حالياً. سيتم التواصل معك قريباً.', en: 'Your registration is currently under review. We will contact you soon.' },
+  statusNotFound: { ku: 'هیچ تۆمارکردنێک بە ئەم ژمارەی تەلەفۆنە نەدۆزرایەوە.', ar: 'لم يتم العثور على أي تسجيل بهذا الرقم.', en: 'No registration found with this phone number.' },
+  statusError: { ku: 'هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵ بدەرەوە.', ar: 'حدث خطأ. يرجى المحاولة مرة أخرى.', en: 'An error occurred. Please try again.' },
 };

@@ -14,7 +14,7 @@ const adminRouter = Router();
 const coursesRouter = Router();
 
 // ---------------------------------------------------------------------------
-// Admin password — required, no hardcoded fallback
+// Admin password
 // ---------------------------------------------------------------------------
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 if (!ADMIN_PASSWORD) {
@@ -30,7 +30,6 @@ const activeTokens = new Map<string, { expiresAt: number }>();
 function issueToken(): string {
   const token = crypto.randomBytes(32).toString("hex");
   activeTokens.set(token, { expiresAt: Date.now() + TOKEN_TTL_MS });
-  // Purge expired tokens opportunistically
   for (const [t, meta] of activeTokens) {
     if (meta.expiresAt < Date.now()) activeTokens.delete(t);
   }
@@ -55,28 +54,23 @@ function revokeToken(authHeader: string | undefined): void {
 }
 
 // ---------------------------------------------------------------------------
-// Rate limiter — simple in-memory per-IP
+// Rate limiter
 // ---------------------------------------------------------------------------
 const failedAttempts = new Map<string, { count: number; resetAt: number }>();
-const RATE_WINDOW_MS = 15 * 60 * 1000; // 15 min window
+const RATE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
 function checkRateLimit(ip: string): "ok" | "blocked" {
   const now = Date.now();
   const entry = failedAttempts.get(ip);
-  if (!entry || entry.resetAt < now) {
-    return "ok";
-  }
+  if (!entry || entry.resetAt < now) return "ok";
   return entry.count >= MAX_ATTEMPTS ? "blocked" : "ok";
 }
 
 function recordFailure(ip: string): void {
   const now = Date.now();
   const entry = failedAttempts.get(ip) ?? { count: 0, resetAt: now + RATE_WINDOW_MS };
-  if (entry.resetAt < now) {
-    entry.count = 0;
-    entry.resetAt = now + RATE_WINDOW_MS;
-  }
+  if (entry.resetAt < now) { entry.count = 0; entry.resetAt = now + RATE_WINDOW_MS; }
   entry.count += 1;
   failedAttempts.set(ip, entry);
 }
@@ -86,90 +80,77 @@ function clearFailures(ip: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Static courses data
+// Grade 12 courses
 // ---------------------------------------------------------------------------
 const COURSES = [
   {
-    id: "english",
-    nameKu: "زمانی ئینگلیزی",
-    nameAr: "اللغة الإنجليزية",
-    nameEn: "English Language",
-    descriptionKu: "فێربوونی زمانی ئینگلیزی لە ئاستی سەرەتا تا ئاستی پیشکەوتوو",
-    descriptionAr: "تعلم اللغة الإنجليزية من المستوى المبتدئ حتى المتقدم",
-    descriptionEn: "Learn English from beginner to advanced level with experienced teachers",
-    icon: "BookOpen",
-    duration: "3 months",
+    id: "chemistry",
+    nameKu: "کیمیا",
+    nameAr: "الكيمياء",
+    nameEn: "Chemistry",
+    descriptionKu: "تێگەیشتنی قووڵ لە بابەتەکانی کیمیای پۆلی دوازدەم",
+    descriptionAr: "فهم عميق لمواضيع الكيمياء للصف الثاني عشر",
+    descriptionEn: "Deep understanding of Grade 12 Chemistry topics",
+    icon: "FlaskConical",
+    duration: "4 months",
     enrolledCount: null as number | null,
   },
   {
-    id: "it",
-    nameKu: "زانستی کامپیوتەر و IT",
-    nameAr: "علوم الكمبيوتر وتقنية المعلومات",
-    nameEn: "IT & Computer Skills",
-    descriptionKu: "فێربوونی مایکڕۆسۆفت ئۆفیس، دیزاین، و بەرنامەسازی سەرەتایی",
-    descriptionAr: "تعلم مايكروسوفت أوفيس والتصميم والبرمجة الأساسية",
-    descriptionEn: "Master Microsoft Office, graphic design, and basic programming skills",
-    icon: "Monitor",
-    duration: "3 months",
+    id: "physics",
+    nameKu: "فیزیا",
+    nameAr: "الفيزياء",
+    nameEn: "Physics",
+    descriptionKu: "تێگەیشتنی یاسا و تیۆریەکانی فیزیای پۆلی دوازدەم",
+    descriptionAr: "فهم قوانين ونظريات الفيزياء للصف الثاني عشر",
+    descriptionEn: "Understanding laws and theories of Grade 12 Physics",
+    icon: "Atom",
+    duration: "4 months",
     enrolledCount: null as number | null,
   },
   {
-    id: "human-dev",
-    nameKu: "گەشەسەندنی مرۆڤایەتی",
-    nameAr: "التطوير البشري",
-    nameEn: "Human Development",
-    descriptionKu: "پەرەپێدانی شارەزاییەکانی کەسایەتی، ڕابەرایەتی، و پەیوەندی کردن",
-    descriptionAr: "تطوير مهارات الشخصية والقيادة والتواصل الفعّال",
-    descriptionEn: "Develop personality skills, leadership, and effective communication",
-    icon: "Users",
-    duration: "2 months",
+    id: "math",
+    nameKu: "بیرکاری",
+    nameAr: "الرياضيات",
+    nameEn: "Mathematics",
+    descriptionKu: "تەمرین و شیکاری بابەتەکانی بیرکاری پۆلی دوازدەم",
+    descriptionAr: "تمارين وتحليل مواضيع الرياضيات للصف الثاني عشر",
+    descriptionEn: "Practice and analysis of Grade 12 Mathematics topics",
+    icon: "Sigma",
+    duration: "4 months",
     enrolledCount: null as number | null,
   },
   {
-    id: "accounting",
-    nameKu: "ژمێریاری و دارایی",
-    nameAr: "المحاسبة والمالية",
-    nameEn: "Accounting & Finance",
-    descriptionKu: "فێربوونی بنەماکانی ژمێریاری و بەڕێوەبردنی دارایی",
-    descriptionAr: "تعلم أساسيات المحاسبة وإدارة الشؤون المالية",
-    descriptionEn: "Learn the fundamentals of accounting and financial management",
-    icon: "Calculator",
-    duration: "3 months",
-    enrolledCount: null as number | null,
-  },
-  {
-    id: "graphic-design",
-    nameKu: "دیزاینی گرافیکی",
-    nameAr: "التصميم الجرافيكي",
-    nameEn: "Graphic Design",
-    descriptionKu: "فێربوونی فۆتۆشۆپ، ئیلستراتۆر، و دیزاینی دیجیتاڵ",
-    descriptionAr: "تعلم فوتوشوب وإليستريتور والتصميم الرقمي",
-    descriptionEn: "Master Photoshop, Illustrator, and digital design techniques",
-    icon: "Palette",
-    duration: "3 months",
-    enrolledCount: null as number | null,
-  },
-  {
-    id: "arabic",
-    nameKu: "زمانی عەرەبی",
+    id: "arabic-g12",
+    nameKu: "عەرەبی",
     nameAr: "اللغة العربية",
-    nameEn: "Arabic Language",
-    descriptionKu: "فێربوونی زمانی عەرەبی لە ئاستی سەرەتا تا ئاستی پیشکەوتوو",
-    descriptionAr: "تعلم اللغة العربية الفصحى من الأساس",
-    descriptionEn: "Learn classical and modern Arabic from beginner to advanced",
-    icon: "Languages",
-    duration: "3 months",
+    nameEn: "Arabic",
+    descriptionKu: "ئامادەکاری بۆ تاقیکردنەوەی عەرەبی پۆلی دوازدەم",
+    descriptionAr: "التحضير لامتحانات اللغة العربية للصف الثاني عشر",
+    descriptionEn: "Preparation for Grade 12 Arabic language exams",
+    icon: "BookText",
+    duration: "4 months",
+    enrolledCount: null as number | null,
+  },
+  {
+    id: "english-g12",
+    nameKu: "ئینگلیزی",
+    nameAr: "اللغة الإنجليزية",
+    nameEn: "English",
+    descriptionKu: "ئامادەکاری بۆ تاقیکردنەوەی ئینگلیزی پۆلی دوازدەم",
+    descriptionAr: "التحضير لامتحانات اللغة الإنجليزية للصف الثاني عشر",
+    descriptionEn: "Preparation for Grade 12 English language exams",
+    icon: "Globe",
+    duration: "4 months",
     enrolledCount: null as number | null,
   },
 ];
 
 const courseNameMap: Record<string, string> = {
-  english: "English Language",
-  it: "IT & Computer Skills",
-  "human-dev": "Human Development",
-  accounting: "Accounting & Finance",
-  "graphic-design": "Graphic Design",
-  arabic: "Arabic Language",
+  chemistry: "کیمیا",
+  physics: "فیزیا",
+  math: "بیرکاری",
+  "arabic-g12": "عەرەبی",
+  "english-g12": "ئینگلیزی",
 };
 
 // ---------------------------------------------------------------------------
@@ -188,6 +169,36 @@ coursesRouter.get("/", async (_req, res) => {
   }));
 
   res.json(coursesWithCounts);
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/registrations/status  (public — check by phone number)
+// ---------------------------------------------------------------------------
+router.get("/status", async (req, res) => {
+  const phone = (req.query.phone as string | undefined)?.trim();
+  if (!phone) {
+    res.status(400).json({ error: "Phone number required" });
+    return;
+  }
+
+  const [reg] = await db
+    .select()
+    .from(registrationsTable)
+    .where(eq(registrationsTable.phoneNumber, phone))
+    .orderBy(desc(registrationsTable.submittedAt))
+    .limit(1);
+
+  if (!reg) {
+    res.json({ status: "not_found" });
+    return;
+  }
+
+  res.json({
+    status: reg.status,
+    studentName: reg.studentName,
+    courseId: reg.courseId,
+    courseName: reg.courseName,
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -217,6 +228,35 @@ router.post("/", async (req, res) => {
     .returning();
 
   res.status(201).json(reg);
+});
+
+// ---------------------------------------------------------------------------
+// PATCH /api/registrations/:id/approve  (requires Bearer token)
+// ---------------------------------------------------------------------------
+router.patch("/:id/approve", async (req, res) => {
+  if (!validateToken(req.headers.authorization)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid registration ID" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(registrationsTable)
+    .set({ status: "approved" })
+    .where(eq(registrationsTable.id, id))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "Registration not found" });
+    return;
+  }
+
+  res.json(updated);
 });
 
 // ---------------------------------------------------------------------------
