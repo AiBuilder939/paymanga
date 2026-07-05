@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Shar Institute API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: registrations
+    description: Student registration operations
+  - name: courses
+    description: Course operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,145 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /registrations:
+    post:
+      operationId: createRegistration
+      tags: [registrations]
+      summary: Submit a student registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationInput"
+      responses:
+        "201":
+          description: Registration submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Registration"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /registrations/admin:
+    get:
+      operationId: listRegistrations
+      tags: [admin]
+      summary: List all registrations (requires Authorization Bearer token)
+      parameters:
+        - name: courseId
+          in: query
+          required: false
+          schema:
+            type: ["string", "null"]
+          description: Filter by course ID
+        - name: shift
+          in: query
+          required: false
+          schema:
+            type: ["string", "null"]
+            enum: ["morning", "evening", null]
+          description: Filter by shift
+      responses:
+        "200":
+          description: List of all registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Registration"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /registrations/stats:
+    get:
+      operationId: getRegistrationStats
+      tags: [admin]
+      summary: Get registration statistics (requires Authorization Bearer token)
+      responses:
+        "200":
+          description: Registration statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationStats"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List all available courses
+      responses:
+        "200":
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login — returns a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Wrong password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many failed attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout — revokes the session token
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +179,168 @@ components:
       required:
         - status
 
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+        - ok
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    AdminLoginInput:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          minLength: 1
+
+    AdminLoginResult:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    RegistrationInput:
+      type: object
+      required:
+        - studentName
+        - phoneNumber
+        - courseId
+        - shift
+        - language
+      properties:
+        studentName:
+          type: string
+          minLength: 2
+          description: Full name of the student
+        phoneNumber:
+          type: string
+          minLength: 7
+          description: Student phone number
+        courseId:
+          type: string
+          description: ID of the selected course
+        shift:
+          type: string
+          enum: ["morning", "evening"]
+          description: Preferred class shift
+        language:
+          type: string
+          enum: ["ku", "ar", "en"]
+          description: Language used during registration
+        notes:
+          type: ["string", "null"]
+          description: Optional notes
+
+    Registration:
+      type: object
+      required:
+        - id
+        - studentName
+        - phoneNumber
+        - courseId
+        - courseName
+        - shift
+        - language
+        - submittedAt
+      properties:
+        id:
+          type: integer
+        studentName:
+          type: string
+        phoneNumber:
+          type: string
+        courseId:
+          type: string
+        courseName:
+          type: string
+        shift:
+          type: string
+          enum: ["morning", "evening"]
+        language:
+          type: string
+          enum: ["ku", "ar", "en"]
+        notes:
+          type: ["string", "null"]
+        submittedAt:
+          type: string
+          format: date-time
+
+    Course:
+      type: object
+      required:
+        - id
+        - nameKu
+        - nameAr
+        - nameEn
+        - descriptionKu
+        - descriptionAr
+        - descriptionEn
+        - icon
+        - duration
+      properties:
+        id:
+          type: string
+        nameKu:
+          type: string
+        nameAr:
+          type: string
+        nameEn:
+          type: string
+        descriptionKu:
+          type: string
+        descriptionAr:
+          type: string
+        descriptionEn:
+          type: string
+        icon:
+          type: string
+        duration:
+          type: string
+        enrolledCount:
+          type: ["integer", "null"]
+
+    RegistrationStats:
+      type: object
+      required:
+        - totalRegistrations
+        - morningCount
+        - eveningCount
+        - byCourse
+      properties:
+        totalRegistrations:
+          type: integer
+        morningCount:
+          type: integer
+        eveningCount:
+          type: integer
+        byCourse:
+          type: array
+          items:
+            type: object
+            required:
+              - courseId
+              - courseName
+              - count
+            properties:
+              courseId:
+                type: string
+              courseName:
+                type: string
+              count:
+                type: integer
+        recentRegistrations:
+          type: ["integer", "null"]
+          description: Registrations in last 7 days

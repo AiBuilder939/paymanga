@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Shar Institute"
+version = "1.0.0"
+id = "artifacts/shar-institute"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18794
+
+[services.development]
+run = "pnpm --filter @workspace/shar-institute run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/shar-institute", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/shar-institute/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18794"
+BASE_PATH = "/"
