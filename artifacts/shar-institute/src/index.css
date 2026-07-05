@@ -192,21 +192,30 @@
     font-family: 'Cairo', 'Noto Sans Arabic', system-ui, sans-serif;
   }
 
-  /* Kurdish & Arabic → Cairo (best coverage + beautiful) */
+  body * {
+    font-family: 'Cairo', 'Noto Sans Arabic', system-ui, sans-serif !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 900 !important;
+    letter-spacing: -0.01em;
+  }
+
+  /* Kurdish & Arabic → Cairo */
   [lang="ku"],
   [data-lang="ku"],
   [lang="ar"],
   [data-lang="ar"],
   .font-ku,
   .font-ar {
-    font-family: 'Cairo', 'Noto Sans Arabic', system-ui, sans-serif;
+    font-family: 'Cairo', 'Noto Sans Arabic', system-ui, sans-serif !important;
   }
 
-  /* English → Inter */
+  /* English also Cairo for consistency */
   [lang="en"],
   [data-lang="en"],
   .font-en {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Cairo', system-ui, sans-serif !important;
   }
 }
 

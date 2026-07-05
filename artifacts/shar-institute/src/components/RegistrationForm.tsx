@@ -5,7 +5,15 @@ import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Phone, MapPin, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useListCourses, useCreateRegistration, RegistrationInputLanguage, RegistrationInputShift } from '@workspace/api-client-react';
+import { useCreateRegistration, RegistrationInputLanguage, RegistrationInputShift } from '@workspace/api-client-react';
+
+const GRADE12_COURSES = [
+  { id: 'chemistry',   ku: 'کیمیا',    ar: 'الكيمياء',         en: 'Chemistry' },
+  { id: 'physics',     ku: 'فیزیا',    ar: 'الفيزياء',         en: 'Physics' },
+  { id: 'math',        ku: 'بیرکاری',  ar: 'الرياضيات',        en: 'Mathematics' },
+  { id: 'arabic-g12',  ku: 'عەرەبی',   ar: 'اللغة العربية',    en: 'Arabic' },
+  { id: 'english-g12', ku: 'ئینگلیزی', ar: 'اللغة الإنجليزية', en: 'English' },
+];
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,14 +37,13 @@ import {
 
 export function RegistrationForm() {
   const { t, lang, dir } = useLanguage();
-  const { data: courses, isLoading: coursesLoading } = useListCourses();
   const createRegistration = useCreateRegistration();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const formSchema = z.object({
-    studentName: z.string().min(2, { message: "Name is too short" }),
-    phoneNumber: z.string().min(7, { message: "Phone number is invalid" }),
-    courseId: z.string().min(1, { message: "Please select a course" }),
+    studentName: z.string().min(2, { message: lang === 'ar' ? 'الاسم قصير جداً' : lang === 'en' ? 'Name is too short' : 'ناوەکەت زۆر کورتە' }),
+    phoneNumber: z.string().min(7, { message: lang === 'ar' ? 'رقم الهاتف غير صحيح' : lang === 'en' ? 'Phone number is invalid' : 'ژمارەی تەلەفۆن دروست نییە' }),
+    courseId: z.string().min(1, { message: lang === 'ar' ? 'الرجاء اختيار الدورة' : lang === 'en' ? 'Please select a course' : 'تکایە کۆرسێک هەڵبژێرە' }),
     shift: z.enum([RegistrationInputShift.morning, RegistrationInputShift.evening]),
     notes: z.string().optional(),
   });
@@ -186,16 +193,12 @@ export function RegistrationForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent dir={dir}>
-                              {coursesLoading ? (
-                                <SelectItem value="loading" disabled>Loading...</SelectItem>
-                              ) : (
-                                courses?.map(course => {
-                                  const name = lang === 'ku' ? course.nameKu : lang === 'ar' ? course.nameAr : course.nameEn;
-                                  return (
-                                    <SelectItem key={course.id} value={course.id}>{name}</SelectItem>
-                                  );
-                                })
-                              )}
+                              {GRADE12_COURSES.map(course => {
+                                const name = lang === 'ku' ? course.ku : lang === 'ar' ? course.ar : course.en;
+                                return (
+                                  <SelectItem key={course.id} value={course.id}>{name}</SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                           <FormMessage />
