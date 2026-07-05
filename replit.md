@@ -1,45 +1,47 @@
-# [Project name]
+# Shar Institute
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
-
-## Run & Operate
-
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+A full-stack course registration web application for Shar Institute.
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- **Frontend:** React 19 + Vite 7, Tailwind CSS 4, TanStack Query, Wouter — `artifacts/shar-institute/`
+- **API Server:** Express 5, TypeScript, esbuild — `artifacts/api-server/`
+- **Database:** PostgreSQL (Replit built-in) + Drizzle ORM — `lib/db/`
+- **API contract:** OpenAPI spec in `lib/api-spec/openapi.yaml`; client generated via Orval into `lib/api-client-react/`
+- **Package manager:** pnpm workspaces (Node 24)
 
-## Where things live
+## Running locally
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+Two workflows must be running:
 
-## Architecture decisions
+| Workflow | Command | Port |
+|---|---|---|
+| `API Server` | `PORT=8080 pnpm --filter @workspace/api-server run dev` | 8080 |
+| `Shar Institute` | `PORT=5173 BASE_PATH=/ pnpm --filter @workspace/shar-institute run dev` | 5173 |
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+## Required secrets
 
-## Product
+| Key | Purpose |
+|---|---|
+| `ADMIN_PASSWORD` | Protects admin routes on the API server |
+| `DATABASE_URL` | Injected automatically by Replit (do not set manually) |
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+## Schema
+
+Push schema changes to the dev database:
+
+```bash
+pnpm --filter @workspace/db push
+```
+
+## API codegen
+
+After editing `lib/api-spec/openapi.yaml`, regenerate the client:
+
+```bash
+pnpm run --filter @workspace/api-spec codegen
+```
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Use pnpm for all package management (npm/yarn are blocked by a preinstall guard).
