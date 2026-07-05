@@ -214,6 +214,11 @@ router.post("/", async (req, res) => {
   const data = parsed.data;
   const courseName = courseNameMap[data.courseId] ?? data.courseId;
 
+  const teacherName =
+    typeof req.body.teacherName === 'string' && req.body.teacherName.trim()
+      ? req.body.teacherName.trim()
+      : null;
+
   const [reg] = await db
     .insert(registrationsTable)
     .values({
@@ -221,6 +226,7 @@ router.post("/", async (req, res) => {
       phoneNumber: data.phoneNumber,
       courseId: data.courseId,
       courseName,
+      teacherName,
       shift: data.shift,
       language: data.language,
       notes: data.notes ?? null,

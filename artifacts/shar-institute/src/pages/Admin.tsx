@@ -48,6 +48,7 @@ type RegWithStatus = {
   notes?: string | null;
   submittedAt: Date;
   status: 'pending' | 'approved';
+  teacherName?: string | null;
 };
 
 const GRADE12_COURSES = [
@@ -291,6 +292,7 @@ export default function Admin() {
                   <TableHead className="text-start">{t('adminColName')}</TableHead>
                   <TableHead className="text-start">{t('adminColPhone')}</TableHead>
                   <TableHead className="text-start">{t('adminColCourse')}</TableHead>
+                  <TableHead className="text-start">مامۆستا</TableHead>
                   <TableHead className="text-start">{t('adminColShift')}</TableHead>
                   <TableHead className="text-start">{t('adminColLang')}</TableHead>
                   <TableHead className="text-start">{t('adminColDate')}</TableHead>
@@ -301,7 +303,7 @@ export default function Admin() {
               <TableBody>
                 {loadingRegs ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         {t('adminLoading')}
@@ -322,6 +324,12 @@ export default function Admin() {
                       <TableCell className="text-start">
                         <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-bold">
                           {reg.courseName}
+                        </span>
+                      </TableCell>
+
+                      <TableCell className="text-start">
+                        <span className="text-sm font-semibold text-foreground">
+                          {reg.teacherName ?? <span className="text-muted-foreground">—</span>}
                         </span>
                       </TableCell>
 
@@ -381,7 +389,7 @@ export default function Admin() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                       {t('adminEmpty')}
                     </TableCell>
                   </TableRow>

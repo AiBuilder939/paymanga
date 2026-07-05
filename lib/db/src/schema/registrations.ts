@@ -8,10 +8,11 @@ export const registrationsTable = pgTable("registrations", {
   phoneNumber: text("phone_number").notNull(),
   courseId: text("course_id").notNull(),
   courseName: text("course_name").notNull(),
-  shift: text("shift").notNull(), // 'morning' | 'evening'
-  language: text("language").notNull(), // 'ku' | 'ar' | 'en'
+  teacherName: text("teacher_name"),                         // nullable — optional
+  shift: text("shift").notNull(),                            // 'morning' | 'evening'
+  language: text("language").notNull(),                      // 'ku' | 'ar' | 'en'
   notes: text("notes"),
-  status: text("status").notNull().default("pending"), // 'pending' | 'approved'
+  status: text("status").notNull().default("pending"),       // 'pending' | 'approved'
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
 });
 
