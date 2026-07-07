@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FlaskConical, Atom, Sigma, Globe, BookText } from 'lucide-react';
+import { FlaskConical, Atom, Sigma, Globe, BookText, Microscope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const GRADE12_SUBJECTS = [
@@ -59,6 +59,17 @@ const GRADE12_SUBJECTS = [
     descEn: 'Preparation for Grade 12 English language exams',
     iconBg: 'bg-rose-500/10 text-rose-600 group-hover:bg-rose-500',
   },
+  {
+    id: 'biology',
+    icon: <Microscope className="w-7 h-7" />,
+    nameKu: 'زیندەزانی',
+    nameAr: 'الأحياء',
+    nameEn: 'Biology',
+    descKu: 'تێگەیشتنی قووڵ لە بەشەکانی زیندەزانی پۆلی دوانزەم بە شێوازی زانستی.',
+    descAr: 'فهم عميق لمحاور الأحياء للصف الثاني عشر بأسلوب علمي.',
+    descEn: 'In-depth understanding of Grade 12 Biology topics in a scientific approach.',
+    iconBg: 'bg-green-500/10 text-green-600 group-hover:bg-green-500',
+  },
 ];
 
 export function Courses() {
@@ -87,7 +98,7 @@ export function Courses() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 md:gap-6" dir={dir}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" dir={dir}>
           {GRADE12_SUBJECTS.map((subject, index) => {
             const name = lang === 'ku' ? subject.nameKu : lang === 'ar' ? subject.nameAr : subject.nameEn;
             const desc = lang === 'ku' ? subject.descKu : lang === 'ar' ? subject.descAr : subject.descEn;
