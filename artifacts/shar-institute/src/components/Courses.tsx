@@ -320,6 +320,122 @@ function Grades1to9Modal() {
   );
 }
 
+const TRANSPORT_OPTIONS = ['پاس', 'تەکسی', 'خۆمان هاتووچۆی پێدەکەین'] as const;
+type Transport = typeof TRANSPORT_OPTIONS[number] | null;
+
+/** Radio group helper */
+function RadioGroup({
+  label,
+  name,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  value: string | null;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-bold text-foreground">{label}</p>
+      <div className="flex flex-wrap gap-5">
+        {options.map((o) => (
+          <label key={o.value} className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="radio"
+              name={name}
+              value={o.value}
+              checked={value === o.value}
+              onChange={() => onChange(o.value)}
+              className="accent-primary w-4 h-4"
+            />
+            <span className="text-sm text-foreground">{o.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Modal for "خولی ئامادەکاری بۆ قوتابخانە (ئاستی ڕەوزە)" */
+function KindergartenModal() {
+  const [fullName, setFullName]         = useState('');
+  const [birthYear, setBirthYear]       = useState('');
+  const [address, setAddress]           = useState('');
+  const [foodAllergy, setFoodAllergy]   = useState<string | null>(null);
+  const [fruitAllergy, setFruitAllergy] = useState<string | null>(null);
+  const [transport, setTransport]       = useState<Transport>(null);
+  const [motherPhone, setMotherPhone]   = useState('');
+  const [fatherPhone, setFatherPhone]   = useState('');
+  const [notes, setNotes]               = useState('');
+
+  const yesNo = [
+    { value: 'yes', label: 'هەیە' },
+    { value: 'no',  label: 'نییە' },
+  ];
+
+  return (
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      {/* Basic info */}
+      <FormField label="ناوی سیانی"      value={fullName}  onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون" type="number" value={birthYear} onChange={setBirthYear} placeholder="٢٠٢٠" />
+      <FormField label="ناونیشان"         value={address}   onChange={setAddress} />
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Health & allergies */}
+      <RadioGroup
+        label="هەستیاری بە خواردن"
+        name="foodAllergy"
+        options={yesNo}
+        value={foodAllergy}
+        onChange={setFoodAllergy}
+      />
+      <RadioGroup
+        label="هەستیاری بە میوە"
+        name="fruitAllergy"
+        options={yesNo}
+        value={fruitAllergy}
+        onChange={setFruitAllergy}
+      />
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Transportation */}
+      <RadioGroup
+        label="هاتووچۆ"
+        name="transport"
+        options={TRANSPORT_OPTIONS.map((t) => ({ value: t, label: t }))}
+        value={transport}
+        onChange={(v) => setTransport(v as Transport)}
+      />
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Contact */}
+      <FormField label="ژمارە مۆبایلی دایک" type="tel" value={motherPhone} onChange={setMotherPhone} placeholder="07..." />
+      <FormField label="ژمارە مۆبایلی باوک" type="tel" value={fatherPhone} onChange={setFatherPhone} placeholder="07..." />
+
+      {/* Notes textarea */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-bold text-foreground">تایبەتمەندی منداڵەکە</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
+          placeholder="هەر تایبەتمەندیەک کە پێویستە بزانین..."
+        />
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main component ─────────────────────────────────────── */
 
 export function Courses() {
@@ -409,8 +525,9 @@ export function Courses() {
             </DialogTitle>
           </DialogHeader>
 
-          {selectedCourse?.id === 'language' && <LanguageCourseModal />}
-          {selectedCourse?.id === 'grades1-9' && <Grades1to9Modal />}
+          {selectedCourse?.id === 'language'      && <LanguageCourseModal />}
+          {selectedCourse?.id === 'grades1-9'    && <Grades1to9Modal />}
+          {selectedCourse?.id === 'kindergarten' && <KindergartenModal />}
         </DialogContent>
       </Dialog>
     </>
