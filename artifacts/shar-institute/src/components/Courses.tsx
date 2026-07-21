@@ -436,6 +436,88 @@ function KindergartenModal() {
   );
 }
 
+const GRADE12_SUBJECTS = ['بیرکاری', 'کیمیا', 'فیزیا', 'زیندەزانی', 'ئینگلیزی', 'عەرەبی'];
+
+/** Modal for "خولی پۆلی ١٢" */
+function Grade12Modal() {
+  const [fullName, setFullName]     = useState('');
+  const [phone1, setPhone1]         = useState('');
+  const [phone2, setPhone2]         = useState('');
+  const [amadayy, setAmadayy]       = useState('');
+  const [bash, setBash]             = useState<string | null>(null);
+  const [shwen, setShwen]           = useState<string | null>(null);
+  const [ragaz, setRagaz]           = useState<string | null>(null);
+  const [subjects, setSubjects]     = useState<string[]>([]);
+  const [teacher, setTeacher]       = useState('');
+
+  const toggleSubject = (s: string) =>
+    setSubjects((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+
+  return (
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      {/* Personal & school info */}
+      <FormField label="ناوی سیانی"   value={fullName} onChange={setFullName} />
+      <FormField label="ژمارە مۆبایل ١" type="tel" value={phone1} onChange={setPhone1} placeholder="07..." />
+      <FormField label="ژمارە مۆبایل ٢" type="tel" value={phone2} onChange={setPhone2} placeholder="07..." />
+      <FormField label="ئامادەیی"      value={amadayy}  onChange={setAmadayy} />
+
+      <div className="border-t border-border" />
+
+      {/* بەش */}
+      <RadioGroup
+        label="بەش"
+        name="bash"
+        options={[{ value: 'زانستی', label: 'زانستی' }, { value: 'وێژەیی', label: 'وێژەیی' }]}
+        value={bash}
+        onChange={setBash}
+      />
+
+      {/* شوێن */}
+      <RadioGroup
+        label="شوێن"
+        name="shwen"
+        options={[{ value: 'ناو شار', label: 'ناو شار' }, { value: 'دەرەوەی شار', label: 'دەرەوەی شار' }]}
+        value={shwen}
+        onChange={setShwen}
+      />
+
+      {/* ڕەگەز */}
+      <RadioGroup
+        label="ڕەگەز"
+        name="ragaz"
+        options={[{ value: 'نێر', label: 'نێر' }, { value: 'مێ', label: 'مێ' }]}
+        value={ragaz}
+        onChange={setRagaz}
+      />
+
+      <div className="border-t border-border" />
+
+      {/* بەشداری وانەکان — checkboxes */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-bold text-foreground">بەشداری وانەکان</p>
+        <div className="flex flex-wrap gap-x-5 gap-y-3">
+          {GRADE12_SUBJECTS.map((s) => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={subjects.includes(s)}
+                onChange={() => toggleSubject(s)}
+                className="accent-primary w-4 h-4 rounded"
+              />
+              <span className="text-sm text-foreground">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* هەڵبژاردنی مامۆستا */}
+      <FormField label="هەڵبژاردنی مامۆستا" value={teacher} onChange={setTeacher} />
+    </div>
+  );
+}
+
 /* ─── Main component ─────────────────────────────────────── */
 
 export function Courses() {
@@ -525,6 +607,7 @@ export function Courses() {
             </DialogTitle>
           </DialogHeader>
 
+          {selectedCourse?.id === 'grade12'       && <Grade12Modal />}
           {selectedCourse?.id === 'language'      && <LanguageCourseModal />}
           {selectedCourse?.id === 'grades1-9'    && <Grades1to9Modal />}
           {selectedCourse?.id === 'kindergarten' && <KindergartenModal />}
