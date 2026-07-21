@@ -18,83 +18,211 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type CourseDetail = { label: string; value: string };
+/* ─── Types ─────────────────────────────────────────────── */
+
+type CourseId =
+  | 'grade12'
+  | 'grade10-11'
+  | 'language'
+  | 'grades1-9'
+  | 'kindergarten'
+  | 'kurdish-alphabet'
+  | 'visa';
 
 type Course = {
-  id: string;
+  id: CourseId;
   title: string;
   icon: React.ReactNode;
-  accent: string;
   iconBg: string;
-  details?: CourseDetail[];
 };
+
+/* ─── Course list ────────────────────────────────────────── */
 
 const COURSES: Course[] = [
   {
     id: 'grade12',
     title: 'خولی پۆلی ١٢',
     icon: <GraduationCap className="w-7 h-7" />,
-    accent: 'from-blue-500 to-indigo-600',
     iconBg: 'bg-blue-500/10 text-blue-600 group-hover:bg-blue-500',
   },
   {
     id: 'grade10-11',
     title: 'خولی پۆلی ١٠ و ١١',
     icon: <BookOpen className="w-7 h-7" />,
-    accent: 'from-violet-500 to-purple-600',
     iconBg: 'bg-violet-500/10 text-violet-600 group-hover:bg-violet-500',
   },
   {
     id: 'language',
     title: 'خولی فێربوونی زمان',
     icon: <Languages className="w-7 h-7" />,
-    accent: 'from-emerald-500 to-teal-600',
     iconBg: 'bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500',
-    details: [
-      { label: 'ئاستەکان', value: 'منداڵان و گەورە' },
-      { label: 'زمانەکان', value: 'ئینگلیزی، عەرەبی، تورکی، فارسی' },
-    ],
   },
   {
     id: 'grades1-9',
     title: 'خولی وانەکانی قوتابخانە ١ بۆ ٩',
     icon: <School className="w-7 h-7" />,
-    accent: 'from-amber-500 to-orange-600',
     iconBg: 'bg-amber-500/10 text-amber-600 group-hover:bg-amber-500',
-    details: [
-      { label: 'پۆلی ١-٣', value: 'بیرکاری، کوردی، ئینگلیزی' },
-      { label: 'پۆلی ٤-٩', value: 'عەرەبی، ئینگلیزی، بیرکاری' },
-    ],
   },
   {
     id: 'kindergarten',
-    title: 'خولی ئامادەکاری بۆ قوتابخانە',
+    title: 'خولی ئامادەکاری بۆ قوتابخانە (ئاستی ڕەوزە)',
     icon: <Star className="w-7 h-7" />,
-    accent: 'from-rose-500 to-pink-600',
     iconBg: 'bg-rose-500/10 text-rose-600 group-hover:bg-rose-500',
-    details: [
-      { label: 'ئاست', value: 'ڕەوزە' },
-    ],
   },
   {
     id: 'kurdish-alphabet',
     title: 'خولی ئەلفوبێی کوردی',
     icon: <BookA className="w-7 h-7" />,
-    accent: 'from-cyan-500 to-sky-600',
     iconBg: 'bg-cyan-500/10 text-cyan-600 group-hover:bg-cyan-500',
   },
   {
     id: 'visa',
     title: 'خولی ڤیزای هاوسەرگیری',
     icon: <Heart className="w-7 h-7" />,
-    accent: 'from-fuchsia-500 to-pink-600',
     iconBg: 'bg-fuchsia-500/10 text-fuchsia-600 group-hover:bg-fuchsia-500',
   },
 ];
 
+/* ─── Modals ─────────────────────────────────────────────── */
+
+/** Generic pill-style toggle button */
+function PillToggle({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
+        selected
+          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+          : 'bg-background text-foreground border-border hover:border-primary/50'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Modal for "خولی فێربوونی زمان" */
+function LanguageCourseModal() {
+  const [level, setLevel] = useState<string | null>(null);
+  const [lang, setLang] = useState<string | null>(null);
+
+  const levels = ['ئاستی منداڵان', 'ئاستی گەورە'];
+  const languages = ['زمانی ئینگلیزی', 'زمانی عەرەبی', 'زمانی تورکی', 'زمانی فارسی'];
+
+  return (
+    <div className="flex flex-col gap-6 pt-2">
+      {/* Level */}
+      <div>
+        <p className="text-sm font-bold text-foreground mb-3">ئاست</p>
+        <div className="flex flex-wrap gap-2">
+          {levels.map((l) => (
+            <PillToggle
+              key={l}
+              label={l}
+              selected={level === l}
+              onClick={() => setLevel(level === l ? null : l)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Language */}
+      <div>
+        <p className="text-sm font-bold text-foreground mb-3">زمان</p>
+        <div className="flex flex-wrap gap-2">
+          {languages.map((ln) => (
+            <PillToggle
+              key={ln}
+              label={ln}
+              selected={lang === ln}
+              onClick={() => setLang(lang === ln ? null : ln)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Grade-range toggle for the 1-9 modal */
+type GradeRange = '1-3' | '4-9' | null;
+
+const SUBJECTS_1_3 = ['بیرکاری', 'کوردی', 'ئینگلیزی'];
+const SUBJECTS_4_9 = ['عەرەبی', 'ئینگلیزی', 'بیرکاری'];
+
+/** Modal for "خولی وانەکانی قوتابخانە ١ بۆ ٩" */
+function Grades1to9Modal() {
+  const [gradeRange, setGradeRange] = useState<GradeRange>(null);
+  const [subject, setSubject] = useState<string | null>(null);
+
+  const handleRangeChange = (range: GradeRange) => {
+    setGradeRange(gradeRange === range ? null : range);
+    setSubject(null); // reset subject when range changes
+  };
+
+  const subjects = gradeRange === '1-3' ? SUBJECTS_1_3 : gradeRange === '4-9' ? SUBJECTS_4_9 : [];
+
+  return (
+    <div className="flex flex-col gap-6 pt-2">
+      {/* Grade range */}
+      <div>
+        <p className="text-sm font-bold text-foreground mb-3">پۆل</p>
+        <div className="flex flex-wrap gap-2">
+          <PillToggle
+            label="پۆلەکانی ١ بۆ ٣"
+            selected={gradeRange === '1-3'}
+            onClick={() => handleRangeChange('1-3')}
+          />
+          <PillToggle
+            label="پۆلەکانی ٤ بۆ ٩"
+            selected={gradeRange === '4-9'}
+            onClick={() => handleRangeChange('4-9')}
+          />
+        </div>
+      </div>
+
+      {/* Subjects — shown only after a range is selected */}
+      {gradeRange && (
+        <motion.div
+          key={gradeRange}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <p className="text-sm font-bold text-foreground mb-3">بابەت</p>
+          <div className="flex flex-wrap gap-2">
+            {subjects.map((s) => (
+              <PillToggle
+                key={s}
+                label={s}
+                selected={subject === s}
+                onClick={() => setSubject(subject === s ? null : s)}
+              />
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Main component ─────────────────────────────────────── */
+
 export function Courses() {
   const { dir } = useLanguage();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+
+  const openModal = (course: Course) => setSelectedCourse(course);
+  const closeModal = () => setSelectedCourse(null);
 
   return (
     <>
@@ -148,34 +276,15 @@ export function Courses() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-foreground mb-3 leading-snug">
+                <h3 className="text-base font-bold text-foreground mb-4 leading-snug flex-1">
                   {course.title}
                 </h3>
 
-                {/* Optional detail badges */}
-                {course.details && course.details.length > 0 && (
-                  <div className="flex flex-col gap-2 mb-4">
-                    {course.details.map((d) => (
-                      <div key={d.label} className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                          {d.label}
-                        </span>
-                        <span className="text-sm text-foreground/80 font-medium leading-snug">
-                          {d.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
                 {/* Enroll button */}
                 <Button
-                  className="w-full mt-4 font-bold bg-primary/8 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                  className="w-full mt-auto font-bold bg-primary/8 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                   variant="outline"
-                  onClick={() => setSelectedCourse(course)}
+                  onClick={() => openModal(course)}
                 >
                   ناوتۆمارکردن
                 </Button>
@@ -187,16 +296,16 @@ export function Courses() {
       </section>
 
       {/* Enrollment modal */}
-      <Dialog
-        open={!!selectedCourse}
-        onOpenChange={(open) => { if (!open) setSelectedCourse(null); }}
-      >
+      <Dialog open={!!selectedCourse} onOpenChange={(open) => { if (!open) closeModal(); }}>
         <DialogContent className="sm:max-w-md" dir={dir}>
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-foreground">
+            <DialogTitle className="text-xl font-black text-foreground leading-snug">
               {selectedCourse?.title}
             </DialogTitle>
           </DialogHeader>
+
+          {selectedCourse?.id === 'language' && <LanguageCourseModal />}
+          {selectedCourse?.id === 'grades1-9' && <Grades1to9Modal />}
         </DialogContent>
       </Dialog>
     </>
