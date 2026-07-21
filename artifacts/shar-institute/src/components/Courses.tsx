@@ -436,6 +436,35 @@ function KindergartenModal() {
   );
 }
 
+/** Modal for "خولی ڤیزای هاوسەرگیری" */
+function VisaModal() {
+  const [fullName, setFullName] = useState('');
+  const [birthYear, setBirthYear] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
+
+  return (
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      <FormField label="ناوی سیانی"      value={fullName}  onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون" type="number" value={birthYear} onChange={setBirthYear} placeholder="١٩٩٠" />
+      <FormField label="ژمارەی مۆبایل"   type="tel"    value={phone}     onChange={setPhone}     placeholder="07..." />
+      <FormField label="ناونیشان"         value={address}   onChange={setAddress} />
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-bold text-foreground">تێبینی یان داواکاری تایبەت</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
+          placeholder="هەر تێبینی یان داواکارییەک بنووسە..."
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Modal for "خولی ئەلفوبێی کوردی" */
 function KurdishAlphabetModal() {
   const [fullName, setFullName]         = useState('');
@@ -672,6 +701,7 @@ export function Courses() {
             </DialogTitle>
           </DialogHeader>
 
+          {selectedCourse?.id === 'visa'              && <VisaModal />}
           {selectedCourse?.id === 'kurdish-alphabet' && <KurdishAlphabetModal />}
           {selectedCourse?.id === 'grade10-11'    && <Grade1011Modal />}
           {selectedCourse?.id === 'grade12'       && <Grade12Modal />}
