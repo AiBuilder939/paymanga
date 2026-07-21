@@ -436,6 +436,25 @@ function KindergartenModal() {
   );
 }
 
+/** Modal for "خولی ئەلفوبێی کوردی" */
+function KurdishAlphabetModal() {
+  const [fullName, setFullName]         = useState('');
+  const [birthYear, setBirthYear]       = useState('');
+  const [motherPhone, setMotherPhone]   = useState('');
+  const [fatherPhone, setFatherPhone]   = useState('');
+  const [address, setAddress]           = useState('');
+
+  return (
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      <FormField label="ناوی سیانی"          value={fullName}    onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون"     type="number" value={birthYear}  onChange={setBirthYear}  placeholder="٢٠١٨" />
+      <FormField label="ژمارە مۆبایلی دایک"  type="tel"    value={motherPhone} onChange={setMotherPhone} placeholder="07..." />
+      <FormField label="ژمارە مۆبایلی باوک"  type="tel"    value={fatherPhone} onChange={setFatherPhone} placeholder="07..." />
+      <FormField label="ناونیشان"             value={address}     onChange={setAddress} />
+    </div>
+  );
+}
+
 /** Modal for "خولی پۆلی ١٠ و ١١" */
 function Grade1011Modal() {
   const [fullName, setFullName]         = useState('');
@@ -653,6 +672,7 @@ export function Courses() {
             </DialogTitle>
           </DialogHeader>
 
+          {selectedCourse?.id === 'kurdish-alphabet' && <KurdishAlphabetModal />}
           {selectedCourse?.id === 'grade10-11'    && <Grade1011Modal />}
           {selectedCourse?.id === 'grade12'       && <Grade12Modal />}
           {selectedCourse?.id === 'language'      && <LanguageCourseModal />}
