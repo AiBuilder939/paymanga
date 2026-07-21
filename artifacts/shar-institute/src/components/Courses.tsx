@@ -110,21 +110,37 @@ function PillToggle({
   );
 }
 
+const LANG_LEVELS    = ['ئاستی منداڵان', 'ئاستی گەورە'];
+const LANG_OPTIONS   = ['زمانی ئینگلیزی', 'زمانی عەرەبی', 'زمانی تورکی', 'زمانی فارسی'];
+
 /** Modal for "خولی فێربوونی زمان" */
 function LanguageCourseModal() {
-  const [level, setLevel] = useState<string | null>(null);
-  const [lang, setLang] = useState<string | null>(null);
-
-  const levels = ['ئاستی منداڵان', 'ئاستی گەورە'];
-  const languages = ['زمانی ئینگلیزی', 'زمانی عەرەبی', 'زمانی تورکی', 'زمانی فارسی'];
+  const [fullName, setFullName]       = useState('');
+  const [birthYear, setBirthYear]     = useState('');
+  const [grade, setGrade]             = useState('');
+  const [motherPhone, setMotherPhone] = useState('');
+  const [fatherPhone, setFatherPhone] = useState('');
+  const [address, setAddress]         = useState('');
+  const [level, setLevel]             = useState<string | null>(null);
+  const [lang, setLang]               = useState<string | null>(null);
+  const [tookCourse, setTookCourse]   = useState<'yes' | 'no' | null>(null);
+  const [prevCourse, setPrevCourse]   = useState('');
 
   return (
-    <div className="flex flex-col gap-6 pt-2">
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      {/* Personal info */}
+      <FormField label="ناوی سیانی"        value={fullName}    onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون"   type="number" value={birthYear}  onChange={setBirthYear} placeholder="٢٠١٥" />
+      <FormField label="پۆل"               value={grade}       onChange={setGrade} />
+      <FormField label="ژمارە مۆبایلی دایک" type="tel"   value={motherPhone} onChange={setMotherPhone} placeholder="07..." />
+      <FormField label="ژمارە مۆبایلی باوک" type="tel"   value={fatherPhone} onChange={setFatherPhone} placeholder="07..." />
+      <FormField label="ناونیشان"           value={address}     onChange={setAddress} />
+
       {/* Level */}
       <div>
         <p className="text-sm font-bold text-foreground mb-3">ئاست</p>
         <div className="flex flex-wrap gap-2">
-          {levels.map((l) => (
+          {LANG_LEVELS.map((l) => (
             <PillToggle
               key={l}
               label={l}
@@ -139,7 +155,7 @@ function LanguageCourseModal() {
       <div>
         <p className="text-sm font-bold text-foreground mb-3">زمان</p>
         <div className="flex flex-wrap gap-2">
-          {languages.map((ln) => (
+          {LANG_OPTIONS.map((ln) => (
             <PillToggle
               key={ln}
               label={ln}
@@ -148,6 +164,43 @@ function LanguageCourseModal() {
             />
           ))}
         </div>
+      </div>
+
+      {/* Previous course question */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-bold text-foreground">پێشتر کۆرسی خوێندووە؟</p>
+        <div className="flex gap-6">
+          {(['yes', 'no'] as const).map((val) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="radio"
+                name="tookCourse"
+                value={val}
+                checked={tookCourse === val}
+                onChange={() => {
+                  setTookCourse(val);
+                  if (val === 'no') setPrevCourse('');
+                }}
+                className="accent-primary w-4 h-4"
+              />
+              <span className="text-sm text-foreground">{val === 'yes' ? 'بەڵێ' : 'نەخێر'}</span>
+            </label>
+          ))}
+        </div>
+
+        {tookCourse === 'yes' && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FormField
+              label="کۆرسەکە چی بووە؟"
+              value={prevCourse}
+              onChange={setPrevCourse}
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   );
