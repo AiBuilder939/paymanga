@@ -7,11 +7,12 @@ export const t = {
   navRegister: { ku: 'تۆمارکردن', ar: 'التسجيل', en: 'Register' },
   navContact: { ku: 'پەیوەندی', ar: 'اتصل بنا', en: 'Contact' },
   navAdmin: { ku: 'بەڕێوەبەری', ar: 'الإدارة', en: 'Admin' },
-  instituteName: { ku: 'پەیمانگای شار', ar: 'معهد شار', en: 'Shar Institute' },
+  instituteName: { ku: 'پەیمانگای فێرکاری شار', ar: 'معهد شار', en: 'Shar Institute' },
 
   // Hero
-  heroTagline: { ku: 'داهاتووت لێرەوە دەستپێدەکات', ar: 'مستقبلك يبدأ من هنا', en: 'Your Future Starts Here' },
+  heroTagline: { ku: 'بۆ خولی بەهێزکردن و فێربوونی زمان', ar: 'مستقبلك يبدأ من هنا', en: 'Your Future Starts Here' },
   heroSubtitle: { ku: 'پەیمانگای شار بەهێزترین شوێنە بۆ فێربوون و پەرەپێدانی شارەزاییەکانت لە سەیدسادق', ar: 'معهد شار هو المكان الأمثل لتعلم المهارات وتطوير نفسك في سعيد صادق', en: 'Shar Institute is the premier destination for skill development and learning in Said Sadiq' },
+  heroNote: { ku: 'لای ئێمە لە پەروەردەو فێرکردنی منداڵەکەت دڵنیاتری...', ar: 'نحن نضمن لك تعليم أفضل لطفلك...', en: 'With us, your child\'s education is in safe hands...' },
   heroCtaEnroll: { ku: 'ئێستا ناونووس بکە', ar: 'سجل الآن', en: 'Enroll Now' },
   heroCtaCourses: { ku: 'کۆرسەکان ببینە', ar: 'استعرض الدورات', en: 'View Courses' },
   heroStats1Label: { ku: 'خوێندکار', ar: 'طالب', en: 'Students' },

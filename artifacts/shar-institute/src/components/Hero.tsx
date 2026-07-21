@@ -106,9 +106,19 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-lg md:text-xl text-white/75 mb-10 max-w-2xl leading-relaxed"
+            className="text-lg md:text-xl text-white/75 mb-4 max-w-2xl leading-relaxed"
           >
             {t('heroSubtitle')}
+          </motion.p>
+
+          {/* Hero note */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.32 }}
+            className="text-base md:text-lg text-accent/90 font-semibold mb-10 max-w-2xl leading-relaxed"
+          >
+            {t('heroNote')}
           </motion.p>
 
           {/* CTA buttons */}
