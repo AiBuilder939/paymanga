@@ -436,6 +436,52 @@ function KindergartenModal() {
   );
 }
 
+/** Modal for "خولی پۆلی ١٠ و ١١" */
+function Grade1011Modal() {
+  const [fullName, setFullName]         = useState('');
+  const [birthYear, setBirthYear]       = useState('');
+  const [grade, setGrade]               = useState('');
+  const [bash, setBash]                 = useState<string | null>(null);
+  const [amadayy, setAmadayy]           = useState('');
+  const [studentPhone, setStudentPhone] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
+  const [address, setAddress]           = useState('');
+
+  return (
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      <FormField label="ناوی سیانی"      value={fullName}  onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون" type="number" value={birthYear} onChange={setBirthYear} placeholder="٢٠٠٨" />
+
+      {/* Grade dropdown */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-bold text-foreground">پۆل</label>
+        <select
+          value={grade}
+          onChange={(e) => setGrade(e.target.value)}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+        >
+          <option value="">— هەڵبژێرە —</option>
+          <option value="10">پۆلی ١٠</option>
+          <option value="11">پۆلی ١١</option>
+        </select>
+      </div>
+
+      <RadioGroup
+        label="بەش"
+        name="bash1011"
+        options={[{ value: 'زانستی', label: 'زانستی' }, { value: 'وێژەیی', label: 'وێژەیی' }]}
+        value={bash}
+        onChange={setBash}
+      />
+
+      <FormField label="ئامادەیی"                 value={amadayy}       onChange={setAmadayy} />
+      <FormField label="ژمارە مۆبایلی قوتابی"     type="tel" value={studentPhone}  onChange={setStudentPhone}  placeholder="07..." />
+      <FormField label="ژمارە مۆبایلی سەرپەرشتیار" type="tel" value={guardianPhone} onChange={setGuardianPhone} placeholder="07..." />
+      <FormField label="ناونیشان"                  value={address}       onChange={setAddress} />
+    </div>
+  );
+}
+
 const GRADE12_SUBJECTS = ['بیرکاری', 'کیمیا', 'فیزیا', 'زیندەزانی', 'ئینگلیزی', 'عەرەبی'];
 
 /** Modal for "خولی پۆلی ١٢" */
@@ -607,6 +653,7 @@ export function Courses() {
             </DialogTitle>
           </DialogHeader>
 
+          {selectedCourse?.id === 'grade10-11'    && <Grade1011Modal />}
           {selectedCourse?.id === 'grade12'       && <Grade12Modal />}
           {selectedCourse?.id === 'language'      && <LanguageCourseModal />}
           {selectedCourse?.id === 'grades1-9'    && <Grades1to9Modal />}
