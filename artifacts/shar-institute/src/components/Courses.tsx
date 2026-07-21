@@ -153,47 +153,99 @@ function LanguageCourseModal() {
   );
 }
 
-/** Grade-range toggle for the 1-9 modal */
-type GradeRange = '1-3' | '4-9' | null;
+const GRADES = [
+  { value: '1', label: 'پۆلی ١' },
+  { value: '2', label: 'پۆلی ٢' },
+  { value: '3', label: 'پۆلی ٣' },
+  { value: '4', label: 'پۆلی ٤' },
+  { value: '5', label: 'پۆلی ٥' },
+  { value: '6', label: 'پۆلی ٦' },
+  { value: '7', label: 'پۆلی ٧' },
+  { value: '8', label: 'پۆلی ٨' },
+  { value: '9', label: 'پۆلی ٩' },
+];
 
-const SUBJECTS_1_3 = ['بیرکاری', 'کوردی', 'ئینگلیزی'];
-const SUBJECTS_4_9 = ['عەرەبی', 'ئینگلیزی', 'بیرکاری'];
+const SUBJECTS_LOW  = ['بیرکاری', 'کوردی', 'ئینگلیزی'];   // grades 1-3
+const SUBJECTS_HIGH = ['عەرەبی', 'ئینگلیزی', 'بیرکاری'];  // grades 4-9
+
+/** Labelled text / number input */
+function FormField({
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder = '',
+}: {
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-bold text-foreground">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+      />
+    </div>
+  );
+}
 
 /** Modal for "خولی وانەکانی قوتابخانە ١ بۆ ٩" */
 function Grades1to9Modal() {
-  const [gradeRange, setGradeRange] = useState<GradeRange>(null);
-  const [subject, setSubject] = useState<string | null>(null);
+  const [fullName, setFullName]     = useState('');
+  const [birthYear, setBirthYear]   = useState('');
+  const [school, setSchool]         = useState('');
+  const [motherPhone, setMotherPhone] = useState('');
+  const [fatherPhone, setFatherPhone] = useState('');
+  const [address, setAddress]       = useState('');
+  const [grade, setGrade]           = useState('');
+  const [subject, setSubject]       = useState<string | null>(null);
 
-  const handleRangeChange = (range: GradeRange) => {
-    setGradeRange(gradeRange === range ? null : range);
-    setSubject(null); // reset subject when range changes
+  const gradeNum = parseInt(grade, 10);
+  const isLow    = gradeNum >= 1 && gradeNum <= 3;
+  const isHigh   = gradeNum >= 4 && gradeNum <= 9;
+  const subjects = isLow ? SUBJECTS_LOW : isHigh ? SUBJECTS_HIGH : [];
+
+  const handleGradeChange = (v: string) => {
+    setGrade(v);
+    setSubject(null); // reset subject when grade changes
   };
 
-  const subjects = gradeRange === '1-3' ? SUBJECTS_1_3 : gradeRange === '4-9' ? SUBJECTS_4_9 : [];
-
   return (
-    <div className="flex flex-col gap-6 pt-2">
-      {/* Grade range */}
-      <div>
-        <p className="text-sm font-bold text-foreground mb-3">پۆل</p>
-        <div className="flex flex-wrap gap-2">
-          <PillToggle
-            label="پۆلەکانی ١ بۆ ٣"
-            selected={gradeRange === '1-3'}
-            onClick={() => handleRangeChange('1-3')}
-          />
-          <PillToggle
-            label="پۆلەکانی ٤ بۆ ٩"
-            selected={gradeRange === '4-9'}
-            onClick={() => handleRangeChange('4-9')}
-          />
-        </div>
+    <div className="flex flex-col gap-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+      {/* Standard fields */}
+      <FormField label="ناوی سیانی"              value={fullName}    onChange={setFullName} />
+      <FormField label="ساڵی لەدایکبوون"          type="number" value={birthYear}  onChange={setBirthYear} placeholder="٢٠١٥" />
+      <FormField label="قوتابخانە"                value={school}      onChange={setSchool} />
+      <FormField label="ژمارە مۆبایلی دایک"       type="tel"    value={motherPhone} onChange={setMotherPhone} placeholder="07..." />
+      <FormField label="ژمارە مۆبایلی باوک"       type="tel"    value={fatherPhone} onChange={setFatherPhone} placeholder="07..." />
+      <FormField label="ناونیشان"                 value={address}     onChange={setAddress} />
+
+      {/* Grade dropdown */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-bold text-foreground">پۆل</label>
+        <select
+          value={grade}
+          onChange={(e) => handleGradeChange(e.target.value)}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+        >
+          <option value="">— هەڵبژێرە —</option>
+          {GRADES.map((g) => (
+            <option key={g.value} value={g.value}>{g.label}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Subjects — shown only after a range is selected */}
-      {gradeRange && (
+      {/* Dynamic subject selection */}
+      {subjects.length > 0 && (
         <motion.div
-          key={gradeRange}
+          key={isLow ? 'low' : 'high'}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
