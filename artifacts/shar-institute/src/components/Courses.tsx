@@ -185,6 +185,15 @@ function SubmitSection({
 
 const GRADE12_SUBJECTS = ['بیرکاری', 'کیمیا', 'فیزیا', 'زیندەزانی', 'ئینگلیزی', 'عەرەبی'];
 
+const GRADE12_TEACHERS: Record<string, string[]> = {
+  'بیرکاری':  ['م. کەیوان جەمال', 'م. بەختیار ئەحمەد'],
+  'عەرەبی':   ['م. کامەران عبدالله', 'م. هیلال صابر'],
+  'کیمیا':    ['م. ئیسحان صالح', 'م. بهادین محمد'],
+  'زیندەزانی':['م. ئاسۆ شەریف'],
+  'فیزیا':    ['م. سەربەست ڕۆستەم', 'م. بیلال بەکر'],
+  'ئینگلیزی': ['م. ئاکام حسین', 'م. بیلال ئەحمەد', 'م. عبدالله حەمەغریب'],
+};
+
 function Grade12Modal({ course, onClose }: ModalProps) {
   const [fullName, setFullName]   = useState('');
   const [phone1, setPhone1]       = useState('');
@@ -194,18 +203,28 @@ function Grade12Modal({ course, onClose }: ModalProps) {
   const [shwen, setShwen]         = useState<string | null>(null);
   const [ragaz, setRagaz]         = useState<string | null>(null);
   const [subjects, setSubjects]   = useState<string[]>([]);
-  const [teacher, setTeacher]     = useState('');
+  const [teachers, setTeachers]   = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError]   = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const toggleSubject = (s: string) =>
-    setSubjects((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s]);
+  const toggleSubject = (s: string) => {
+    setSubjects((p) => {
+      const next = p.includes(s) ? p.filter((x) => x !== s) : [...p, s];
+      if (!next.includes(s)) {
+        setTeachers((t) => { const c = { ...t }; delete c[s]; return c; });
+      }
+      return next;
+    });
+  };
+
+  const setSubjectTeacher = (subject: string, teacher: string) =>
+    setTeachers((t) => ({ ...t, [subject]: teacher }));
 
   const isValid =
     fullName.trim() !== '' && phone1.trim() !== '' && phone2.trim() !== '' &&
     amadayy.trim() !== '' && bash !== null && shwen !== null && ragaz !== null &&
-    subjects.length > 0 && teacher.trim() !== '';
+    subjects.length > 0 && subjects.every((s) => teachers[s]?.trim());
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -213,8 +232,7 @@ function Grade12Modal({ course, onClose }: ModalProps) {
     try {
       await postRegistration({
         studentName: fullName, phoneNumber: phone1, courseId: course.id,
-        teacherName: teacher,
-        metadata: { phone2, amadayy, bash, shwen, ragaz, subjects },
+        metadata: { phone2, amadayy, bash, shwen, ragaz, subjects, teachers },
       });
       setSubmitSuccess(true);
     } catch { setSubmitError('کێشەیەک هەیە، دووبارە هەوڵبدەرەوە'); }
@@ -245,7 +263,27 @@ function Grade12Modal({ course, onClose }: ModalProps) {
             ))}
           </div>
         </div>
-        <FormField label="هەڵبژاردنی مامۆستا" value={teacher} onChange={setTeacher} />
+        {subjects.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm font-bold text-foreground">هەڵبژاردنی مامۆستا</p>
+            {subjects.map((s) => (
+              <div key={s} className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-muted-foreground">{s}</label>
+                <select
+                  value={teachers[s] ?? ''}
+                  onChange={(e) => setSubjectTeacher(s, e.target.value)}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                  dir="rtl"
+                >
+                  <option value="">مامۆستا هەڵبژێرە...</option>
+                  {(GRADE12_TEACHERS[s] ?? []).map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <SubmitSection isValid={isValid} isSubmitting={isSubmitting} error={submitError} onSubmit={handleSubmit} />
     </>
