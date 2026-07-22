@@ -151,6 +151,13 @@ const courseNameMap: Record<string, string> = {
   math: "بیرکاری",
   "arabic-g12": "عەرەبی",
   "english-g12": "ئینگلیزی",
+  "grade12": "خولی پۆلی ١٢",
+  "grade10-11": "خولی پۆلی ١٠ و ١١",
+  "language": "خولی فێربوونی زمان",
+  "grades1-9": "خولی وانەکانی قوتابخانە ١ بۆ ٩",
+  "kindergarten": "خولی ئامادەکاری بۆ قوتابخانە",
+  "kurdish-alphabet": "خولی ئەلفوبێی کوردی",
+  "visa": "خولی ڤیزای هاوسەرگیری",
 };
 
 // ---------------------------------------------------------------------------
@@ -219,6 +226,11 @@ router.post("/", async (req, res) => {
       ? req.body.teacherName.trim()
       : null;
 
+  const metadata =
+    typeof req.body.metadata === 'string' && req.body.metadata.trim()
+      ? req.body.metadata
+      : null;
+
   const [reg] = await db
     .insert(registrationsTable)
     .values({
@@ -230,6 +242,7 @@ router.post("/", async (req, res) => {
       shift: data.shift,
       language: data.language,
       notes: data.notes ?? null,
+      metadata,
     })
     .returning();
 

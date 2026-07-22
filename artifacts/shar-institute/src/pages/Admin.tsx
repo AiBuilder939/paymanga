@@ -16,8 +16,14 @@ import {
   Lock, ArrowLeft, LogOut,
   Download, Filter,
   Users, Sun, Moon, CalendarDays, BookOpen,
-  CheckCircle2, Loader2
+  CheckCircle2, Loader2, Info
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -49,6 +55,31 @@ type RegWithStatus = {
   submittedAt: Date;
   status: 'pending' | 'approved';
   teacherName?: string | null;
+  metadata?: string | null;
+};
+
+const META_LABELS: Record<string, string> = {
+  phone2:        'ژمارە مۆبایل ٢',
+  amadayy:       'ئامادەیی',
+  bash:          'بەش',
+  shwen:         'شوێن',
+  ragaz:         'ڕەگەز',
+  subjects:      'بابەتەکان',
+  birthYear:     'ساڵی لەدایکبوون',
+  grade:         'پۆل',
+  guardianPhone: 'ژمارە سەرپەرشتیار',
+  fatherPhone:   'ژمارە باوک',
+  address:       'ناونیشان',
+  school:        'قوتابخانە',
+  subject:       'بابەت',
+  level:         'ئاست',
+  lang:          'زمان',
+  tookCourse:    'پێشتر کۆرسی خوێندووە',
+  prevCourse:    'کۆرسی پێشوو',
+  foodAllergy:   'هەستیاری خواردن',
+  fruitAllergy:  'هەستیاری میوە',
+  transport:     'هاتووچۆ',
+  studentPhone:  'ژمارە قوتابی',
 };
 
 const GRADE12_COURSES = [
@@ -70,6 +101,7 @@ export default function Admin() {
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [shiftFilter, setShiftFilter] = useState<string>('all');
   const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [detailsReg, setDetailsReg] = useState<RegWithStatus | null>(null);
 
   const adminLogin = useAdminLogin();
   const adminLogout = useAdminLogout();
@@ -368,22 +400,33 @@ export default function Admin() {
                       </TableCell>
 
                       <TableCell className="text-start">
-                        {reg.status === 'approved' ? (
-                          <span className="text-xs text-muted-foreground font-medium">—</span>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-3 text-xs font-bold border-emerald-400 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors dark:border-emerald-700 dark:text-emerald-400"
-                            disabled={approvingId === reg.id}
-                            onClick={() => handleApprove(reg.id)}
-                          >
-                            {approvingId === reg.id
-                              ? <Loader2 className="w-3 h-3 animate-spin" />
-                              : t('adminApprove')
-                            }
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {reg.status !== 'approved' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-3 text-xs font-bold border-emerald-400 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors dark:border-emerald-700 dark:text-emerald-400"
+                              disabled={approvingId === reg.id}
+                              onClick={() => handleApprove(reg.id)}
+                            >
+                              {approvingId === reg.id
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : t('adminApprove')
+                              }
+                            </Button>
+                          )}
+                          {reg.metadata && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                              title="تایبەتمەندیەکان"
+                              onClick={() => setDetailsReg(reg)}
+                            >
+                              <Info className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -399,6 +442,42 @@ export default function Admin() {
           </div>
         </div>
       </main>
+
+      {/* Metadata details dialog */}
+      <Dialog open={!!detailsReg} onOpenChange={(open) => { if (!open) setDetailsReg(null); }}>
+        <DialogContent className="sm:max-w-md" dir={dir}>
+          <DialogHeader>
+            <DialogTitle className="text-lg font-black">
+              {detailsReg?.studentName} — {detailsReg?.courseName}
+            </DialogTitle>
+          </DialogHeader>
+          {detailsReg?.metadata && (() => {
+            let parsed: Record<string, unknown> = {};
+            try { parsed = JSON.parse(detailsReg.metadata); } catch { /* noop */ }
+            const entries = Object.entries(parsed).filter(([, v]) => v !== null && v !== undefined && v !== '');
+            return (
+              <div className="flex flex-col gap-3 pt-2 max-h-[60vh] overflow-y-auto pr-1">
+                {entries.map(([key, val]) => (
+                  <div key={key} className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0">
+                    <span className="text-sm font-bold text-muted-foreground shrink-0">
+                      {META_LABELS[key] ?? key}
+                    </span>
+                    <span className="text-sm text-foreground text-end">
+                      {Array.isArray(val) ? val.join('، ') : String(val)}
+                    </span>
+                  </div>
+                ))}
+                {detailsReg.notes && (
+                  <div className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0">
+                    <span className="text-sm font-bold text-muted-foreground shrink-0">تێبینی</span>
+                    <span className="text-sm text-foreground text-end">{detailsReg.notes}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
