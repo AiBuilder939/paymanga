@@ -49,8 +49,8 @@ export const t = {
   // Contact
   contactTitle: { ku: 'پەیوەندیمان پێوە بکە', ar: 'تواصل معنا', en: 'Contact Us' },
   contactAddress: { ku: 'سەید صادق، هەرێمی کوردستان، عێراق', ar: 'سعيد صادق، إقليم كردستان، العراق', en: 'Said Sadiq, Kurdistan Region, Iraq' },
-  contactHours: { ku: 'شەممە تا پێنجشەممە: ٨ بەیانی - ٨ ئێوارە', ar: 'السبت إلى الخميس: 8 صباحاً - 8 مساءً', en: 'Sat–Thu: 8:00 AM – 8:00 PM' },
   contactPhone: { ku: 'ژ. تەلەفۆن', ar: 'رقم الهاتف', en: 'Phone' },
+  contactFollowUs: { ku: 'شوێنمان بکەوە', ar: 'تابعنا', en: 'Follow Us' },
 
   // Footer
   footerRights: { ku: 'هەموو مافەکان پارێزراون', ar: 'جميع الحقوق محفوظة', en: 'All rights reserved' },
