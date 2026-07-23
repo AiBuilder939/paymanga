@@ -48,8 +48,7 @@ export function Navbar() {
             <img
               src="/assets/images/logo.jpg"
               alt="Shar Tutorial Institute"
-              className="h-12 w-auto object-contain"
-              style={{ maxHeight: '50px' }}
+              className="w-14 h-14 rounded-full object-cover aspect-square border-2 border-white/40 shadow-md ring-2 ring-white/20"
             />
           </div>
         </Link>
