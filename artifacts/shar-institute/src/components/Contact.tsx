@@ -1,7 +1,7 @@
 import { MapPin, Phone, Facebook, Instagram, Youtube } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const PHONES = ['0750 123 4567', '0770 123 4567'];
+const PHONES = ['0750 119 6540', '0770 762 3252', '0750 185 8773'];
 
 const SOCIAL = [
   { icon: Facebook,  label: 'Facebook',  href: '#' },

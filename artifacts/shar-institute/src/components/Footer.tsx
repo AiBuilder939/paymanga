@@ -1,5 +1,7 @@
 import { Link } from 'wouter';
-import { Facebook, Instagram, Phone as WhatsApp } from 'lucide-react';
+import { Facebook, Instagram, Phone as WhatsApp, Phone } from 'lucide-react';
+
+const PHONES = ['0750 119 6540', '0770 762 3252', '0750 185 8773'];
 import { useLanguage } from '../contexts/LanguageContext';
 
 export function Footer() {
@@ -58,6 +60,19 @@ export function Footer() {
           {/* Social & Contact */}
           <div>
             <h4 className="font-bold text-sidebar-foreground mb-4">{t('navContact')}</h4>
+            <div className="flex flex-col gap-1.5 mb-5">
+              {PHONES.map((p) => (
+                <a
+                  key={p}
+                  href={`tel:${p.replace(/\s/g, '')}`}
+                  className="flex items-center gap-2 text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors"
+                  dir="ltr"
+                >
+                  <Phone className="w-4 h-4 shrink-0" />
+                  {p}
+                </a>
+              ))}
+            </div>
             <div className="flex items-center gap-4 mb-6">
               <a href="#" className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-accent-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground transition-colors">
                 <Facebook className="w-5 h-5" />
