@@ -1,24 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Lang } from '../translations';
-import { Menu, X, Globe, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 export function Navbar() {
-  const { lang, setLang, t, dir } = useLanguage();
+  const { t, dir } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
-    // Set initial state
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -39,47 +31,26 @@ export function Navbar() {
     }
   };
 
-  const languages: { code: Lang; label: string; flag: string }[] = [
-    { code: 'ku', label: 'کوردی',    flag: '🇹🇯' },
-    { code: 'ar', label: 'العربية', flag: '🇮🇶' },
-    { code: 'en', label: 'English',  flag: '🇬🇧' },
-  ];
-
-  const activeLang = languages.find((l) => l.code === lang) ?? languages[0];
-
   return (
     <nav
       dir={dir}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-navbar ${
         scrolled
-          ? 'bg-background/92 border-b border-border shadow-sm py-3'
-          : 'bg-primary/85 border-b border-white/10 py-4'
+          ? 'bg-background/92 border-b border-border shadow-sm py-2'
+          : 'bg-primary/85 border-b border-white/10 py-3'
       }`}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
 
         {/* ── Logo ─────────────────────────────────── */}
         <Link href="/">
-          <div className="flex items-center gap-3 cursor-pointer group select-none">
-            {/* Logo mark */}
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform duration-200 ${
-                scrolled
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-accent text-accent-foreground'
-              }`}
-              style={{ lineHeight: 1 }}
-            >
-              ش
-            </div>
-            {/* Institute name */}
-            <span
-              className={`font-black text-xl md:text-2xl leading-none transition-colors ${
-                scrolled ? 'text-foreground' : 'text-white'
-              }`}
-            >
-              {t('instituteName')}
-            </span>
+          <div className="flex items-center cursor-pointer select-none">
+            <img
+              src="/assets/images/logo.jpg"
+              alt="Shar Tutorial Institute"
+              className="h-12 w-auto object-contain"
+              style={{ maxHeight: '50px' }}
+            />
           </div>
         </Link>
 
@@ -101,79 +72,17 @@ export function Navbar() {
             ))}
           </ul>
 
-          <div className="flex items-center gap-3">
-            {/* Language picker */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`gap-1.5 font-semibold ${
-                    scrolled
-                      ? 'text-foreground hover:bg-muted'
-                      : 'text-white/90 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  <Globe className="w-4 h-4 shrink-0" />
-                  <span>{activeLang.label}</span>
-                  <ChevronDown className="w-3 h-3 opacity-60" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align={dir === 'rtl' ? 'start' : 'end'} className="w-32">
-                {languages.map((l) => (
-                  <DropdownMenuItem
-                    key={l.code}
-                    onClick={() => setLang(l.code)}
-                    className={`flex items-center gap-2 cursor-pointer font-medium ${
-                      lang === l.code ? 'bg-muted' : ''
-                    }`}
-                    dir={l.code === 'en' ? 'ltr' : 'rtl'}
-                  >
-                    <span>{l.flag}</span>
-                    <span>{l.label}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Enroll CTA */}
-            <Button
-              className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold shadow-md hover:-translate-y-0.5 transition-all"
-              onClick={() => document.querySelector('#register')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              {t('heroCtaEnroll')}
-            </Button>
-          </div>
+          {/* Enroll CTA */}
+          <Button
+            className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold shadow-md hover:-translate-y-0.5 transition-all"
+            onClick={() => document.querySelector('#register')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            {t('heroCtaEnroll')}
+          </Button>
         </div>
 
         {/* ── Mobile Controls ──────────────────────── */}
         <div className="flex items-center gap-2 md:hidden">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={scrolled ? 'text-foreground' : 'text-white'}
-                aria-label="Change language"
-              >
-                <Globe className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {languages.map((l) => (
-                <DropdownMenuItem
-                  key={l.code}
-                  onClick={() => setLang(l.code)}
-                  className="flex items-center gap-2 cursor-pointer"
-                  dir={l.code === 'en' ? 'ltr' : 'rtl'}
-                >
-                  <span>{l.flag}</span>
-                  <span>{l.label}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <Button
             variant="ghost"
             size="icon"
