@@ -1,12 +1,11 @@
-import { MapPin, Phone, Facebook, Instagram, Youtube } from 'lucide-react';
+import { MapPin, Phone, Facebook, Instagram } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const PHONES = ['0750 119 6540', '0770 762 3252', '0750 185 8773'];
 
 const SOCIAL = [
-  { icon: Facebook,  label: 'Facebook',  href: '#' },
-  { icon: Instagram, label: 'Instagram', href: '#' },
-  { icon: Youtube,   label: 'YouTube',   href: '#' },
+  { icon: Facebook,  label: 'Facebook',  href: 'https://www.facebook.com/p.ymangay.shar?mibextid=wwXIfr&mibextid=wwXIfr' },
+  { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/paimangay_shar?igsh=MTJoOHk3NWVuamdwaA==' },
 ];
 
 export function Contact() {
@@ -72,6 +71,8 @@ export function Contact() {
                 key={label}
                 href={href}
                 aria-label={label}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 rounded-2xl border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
               >
                 <Icon className="w-5 h-5" />
