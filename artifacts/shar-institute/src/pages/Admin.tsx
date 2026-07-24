@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import {
   Lock, ArrowLeft, LogOut,
   Download, Filter,
-  Users, Sun, Moon, CalendarDays, BookOpen,
+  Users, CalendarDays, BookOpen,
   CheckCircle2, Loader2, Info, Trash2
 } from 'lucide-react';
 import {
@@ -83,13 +83,30 @@ const META_LABELS: Record<string, string> = {
   studentPhone:  'ژمارە قوتابی',
 };
 
-const GRADE12_COURSES = [
-  { id: 'chemistry',   ku: 'کیمیا',    ar: 'الكيمياء',         en: 'Chemistry' },
-  { id: 'physics',     ku: 'فیزیا',    ar: 'الفيزياء',         en: 'Physics' },
-  { id: 'math',        ku: 'بیرکاری',  ar: 'الرياضيات',        en: 'Mathematics' },
-  { id: 'arabic-g12',  ku: 'عەرەبی',   ar: 'اللغة العربية',    en: 'Arabic' },
-  { id: 'english-g12', ku: 'ئینگلیزی', ar: 'اللغة الإنجليزية', en: 'English' },
+const ALL_COURSES = [
+  { id: 'grade12',          label: 'خولی پۆلی ١٢' },
+  { id: 'grade10-11',       label: 'خولی پۆلی ١٠ و ١١' },
+  { id: 'language',         label: 'خولی فێربوونی زمان' },
+  { id: 'grades1-9',        label: 'خولی وانەکانی قوتابخانە ١ بۆ ٩' },
+  { id: 'kindergarten',     label: 'خولی ئامادەکاری بۆ قوتابخانە' },
+  { id: 'kurdish-alphabet', label: 'خولی ئەلفوبێی کوردی' },
+  { id: 'visa',             label: 'خولی ڤیزای هاوسەرگیری' },
 ];
+
+/** Resolve the best teacher display string for a registration row */
+function resolveTeacher(teacherName?: string | null, metadata?: string | null): string | null {
+  if (teacherName?.trim()) return teacherName.trim();
+  if (!metadata) return null;
+  try {
+    const meta = JSON.parse(metadata);
+    // Grade12 stores { teachers: { subject: teacherName, ... } }
+    if (meta.teachers && typeof meta.teachers === 'object') {
+      const names = Object.values(meta.teachers as Record<string, string>).filter(Boolean);
+      if (names.length > 0) return names.join('، ');
+    }
+  } catch { /* noop */ }
+  return null;
+}
 
 export default function Admin() {
   const [, setLocation] = useLocation();
@@ -100,7 +117,6 @@ export default function Admin() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [courseFilter, setCourseFilter] = useState<string>('all');
-  const [shiftFilter, setShiftFilter] = useState<string>('all');
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -112,17 +128,13 @@ export default function Admin() {
   const isAuthenticated = !!token;
 
   const { data: registrationsRaw, isLoading: loadingRegs } = useListRegistrations(
-    {
-      courseId: courseFilter !== 'all' ? courseFilter : undefined,
-      shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
-    },
+    { courseId: courseFilter !== 'all' ? courseFilter : undefined },
     {
       query: {
         enabled: isAuthenticated,
         retry: false,
         queryKey: getListRegistrationsQueryKey({
           courseId: courseFilter !== 'all' ? courseFilter : undefined,
-          shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
         }),
       }
     }
@@ -173,7 +185,6 @@ export default function Admin() {
       queryClient.invalidateQueries({
         queryKey: getListRegistrationsQueryKey({
           courseId: courseFilter !== 'all' ? courseFilter : undefined,
-          shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
         }),
       });
     } finally {
@@ -193,16 +204,12 @@ export default function Admin() {
       queryClient.invalidateQueries({
         queryKey: getListRegistrationsQueryKey({
           courseId: courseFilter !== 'all' ? courseFilter : undefined,
-          shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
         }),
       });
     } finally {
       setApprovingId(null);
     }
   };
-
-  const courseName = (c: typeof GRADE12_COURSES[0]) =>
-    lang === 'ku' ? c.ku : lang === 'ar' ? c.ar : c.en;
 
   // ── LOGIN ──────────────────────────────────────────────────────────────────
   if (!isAuthenticated) {
@@ -273,12 +280,10 @@ export default function Admin() {
 
       <main className="container mx-auto px-4 md:px-6 py-8">
         {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-8">
           {[
-            { label: t('adminTotalRegs'),   value: stats?.totalRegistrations ?? 0, icon: Users,       color: 'bg-blue-100 text-blue-600' },
-            { label: t('adminMorningShift'), value: stats?.morningCount ?? 0,       icon: Sun,         color: 'bg-amber-100 text-amber-600' },
-            { label: t('adminEveningShift'), value: stats?.eveningCount ?? 0,        icon: Moon,        color: 'bg-indigo-100 text-indigo-600' },
-            { label: t('adminLast7Days'),    value: stats?.recentRegistrations ?? 0, icon: CalendarDays, color: 'bg-emerald-100 text-emerald-600' },
+            { label: t('adminTotalRegs'), value: stats?.totalRegistrations ?? 0, icon: Users,        color: 'bg-blue-100 text-blue-600' },
+            { label: t('adminLast7Days'), value: stats?.recentRegistrations ?? 0, icon: CalendarDays, color: 'bg-emerald-100 text-emerald-600' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-card border border-border rounded-xl p-5 flex items-center gap-4 shadow-sm">
               <div className={`w-12 h-12 rounded-full ${color} flex items-center justify-center shrink-0`}>
@@ -310,28 +315,17 @@ export default function Admin() {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Select value={courseFilter} onValueChange={setCourseFilter} dir={dir}>
-                  <SelectTrigger className="w-full sm:w-[180px] bg-background">
+                  <SelectTrigger className="w-full sm:w-[230px] bg-background">
                     <SelectValue placeholder={t('adminAllCourses')} />
                   </SelectTrigger>
                   <SelectContent dir={dir}>
                     <SelectItem value="all">{t('adminAllCourses')}</SelectItem>
-                    {GRADE12_COURSES.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{courseName(c)}</SelectItem>
+                    {ALL_COURSES.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              <Select value={shiftFilter} onValueChange={setShiftFilter} dir={dir}>
-                <SelectTrigger className="w-full sm:w-[140px] bg-background">
-                  <SelectValue placeholder={t('adminAllShifts')} />
-                </SelectTrigger>
-                <SelectContent dir={dir}>
-                  <SelectItem value="all">{t('adminAllShifts')}</SelectItem>
-                  <SelectItem value="morning">{t('adminMorningLabel')}</SelectItem>
-                  <SelectItem value="evening">{t('adminEveningLabel')}</SelectItem>
-                </SelectContent>
-              </Select>
 
               <Button variant="outline" size="icon" title="Export" className="shrink-0">
                 <Download className="w-4 h-4" />
@@ -349,8 +343,6 @@ export default function Admin() {
                   <TableHead className="text-start">{t('adminColPhone')}</TableHead>
                   <TableHead className="text-start">{t('adminColCourse')}</TableHead>
                   <TableHead className="text-start">مامۆستا</TableHead>
-                  <TableHead className="text-start">{t('adminColShift')}</TableHead>
-                  <TableHead className="text-start">{t('adminColLang')}</TableHead>
                   <TableHead className="text-start">{t('adminColDate')}</TableHead>
                   <TableHead className="text-start">{t('adminColStatus')}</TableHead>
                   <TableHead className="text-start">{t('adminColActions')}</TableHead>
@@ -359,7 +351,7 @@ export default function Admin() {
               <TableBody>
                 {loadingRegs ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         {t('adminLoading')}
@@ -385,23 +377,7 @@ export default function Admin() {
 
                       <TableCell className="text-start">
                         <span className="text-sm font-semibold text-foreground">
-                          {reg.teacherName ?? <span className="text-muted-foreground">—</span>}
-                        </span>
-                      </TableCell>
-
-                      <TableCell className="text-start">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${
-                          reg.shift === 'morning'
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                            : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                        }`}>
-                          {reg.shift === 'morning' ? t('adminMorningLabel') : t('adminEveningLabel')}
-                        </span>
-                      </TableCell>
-
-                      <TableCell className="text-start">
-                        <span className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">
-                          {reg.language === 'ku' ? t('adminLangKu') : reg.language === 'ar' ? t('adminLangAr') : t('adminLangEn')}
+                          {resolveTeacher(reg.teacherName, reg.metadata) ?? <span className="text-muted-foreground">—</span>}
                         </span>
                       </TableCell>
 
@@ -485,7 +461,7 @@ export default function Admin() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       {t('adminEmpty')}
                     </TableCell>
                   </TableRow>
@@ -510,13 +486,12 @@ export default function Admin() {
             try { if (detailsReg.metadata) meta = JSON.parse(detailsReg.metadata); } catch { /* noop */ }
 
             // Core fields always shown
+            const resolvedTeacher = resolveTeacher(detailsReg.teacherName, detailsReg.metadata);
             const coreRows: { label: string; value: string }[] = [
               { label: 'ناوی قوتابی',       value: detailsReg.studentName },
               { label: 'ژ. تەلەفۆن',        value: detailsReg.phoneNumber },
               { label: 'کۆرس',              value: detailsReg.courseName },
-              ...(detailsReg.teacherName ? [{ label: 'مامۆستا', value: detailsReg.teacherName }] : []),
-              { label: 'کاتی وانە',         value: detailsReg.shift === 'morning' ? t('adminMorningLabel') : t('adminEveningLabel') },
-              { label: 'زمان',              value: detailsReg.language === 'ku' ? t('adminLangKu') : detailsReg.language === 'ar' ? t('adminLangAr') : t('adminLangEn') },
+              ...(resolvedTeacher ? [{ label: 'مامۆستا', value: resolvedTeacher }] : []),
               { label: 'بەرواری تۆمارکردن', value: format(new Date(detailsReg.submittedAt), 'dd/MM/yyyy HH:mm') },
               { label: 'دۆخ',              value: detailsReg.status === 'approved' ? t('adminApproved') : t('adminPending') },
             ];
