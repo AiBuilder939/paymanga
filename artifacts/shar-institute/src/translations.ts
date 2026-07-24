@@ -18,7 +18,7 @@ export const t = {
   heroStats1Label: { ku: 'خوێندکار', ar: 'طالب', en: 'Students' },
   heroStats1Value: { ku: '+٥٠٠', ar: '+500', en: '500+' },
   heroStats2Label: { ku: 'کۆرس', ar: 'دورة', en: 'Courses' },
-  heroStats2Value: { ku: '٥', ar: '5', en: '5' },
+  heroStats2Value: { ku: '+٥', ar: '+5', en: '5+' },
   heroStats3Label: { ku: 'مامۆستا', ar: 'مدرس', en: 'Teachers' },
   heroStats3Value: { ku: '+١٠', ar: '+10', en: '10+' },
 
