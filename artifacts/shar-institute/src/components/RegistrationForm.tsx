@@ -116,6 +116,9 @@ export function RegistrationForm() {
     phoneNumber: z.string().min(7, {
       message: lang === 'ar' ? 'رقم الهاتف غير صحيح' : lang === 'en' ? 'Phone number is invalid' : 'ژمارەی تەلەفۆن دروست نییە',
     }),
+    phone2: z.string().optional(),
+    birthYear: z.string().optional(),
+    address: z.string().optional(),
     courseId: z.string().min(1, {
       message: lang === 'ar' ? 'الرجاء اختيار الدورة' : lang === 'en' ? 'Please select a course' : 'تکایە کۆرسێک هەڵبژێرە',
     }),
@@ -126,13 +129,19 @@ export function RegistrationForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { studentName: '', phoneNumber: '', courseId: '', teacherName: '', shift: undefined, notes: '' },
+    defaultValues: { studentName: '', phoneNumber: '', phone2: '', birthYear: '', address: '', courseId: '', teacherName: '', shift: undefined, notes: '' },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     setSubmitError(false);
     try {
+      // Bundle optional extra fields into metadata JSON
+      const meta: Record<string, string> = {};
+      if (values.phone2?.trim())     meta.phone2     = values.phone2.trim();
+      if (values.birthYear?.trim())  meta.birthYear  = values.birthYear.trim();
+      if (values.address?.trim())    meta.address    = values.address.trim();
+
       const res = await fetch('/api/registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,6 +153,7 @@ export function RegistrationForm() {
           shift:        values.shift,
           language:     lang as RegistrationInputLanguage,
           notes:        values.notes || null,
+          metadata:     Object.keys(meta).length > 0 ? JSON.stringify(meta) : null,
         }),
       });
       if (!res.ok) throw new Error('Server error');
@@ -195,7 +205,11 @@ export function RegistrationForm() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-white/90">{t('contactPhone')}</h4>
-                      <p className="text-white/70 text-sm mt-1" dir="ltr">0750 123 4567</p>
+                      <div className="flex flex-col gap-0.5 mt-1" dir="ltr">
+                        <p className="text-white/70 text-sm">0750 119 6540</p>
+                        <p className="text-white/70 text-sm">0770 762 3252</p>
+                        <p className="text-white/70 text-sm">0750 185 8773</p>
+                      </div>
                     </div>
                   </div>
 
@@ -349,6 +363,57 @@ export function RegistrationForm() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  {/* Extra info: second phone + birth year */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="phone2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {lang === 'ku' ? 'ژمارە مۆبایل ٢ (ئارەزوومەندانە)' : lang === 'ar' ? 'رقم الهاتف الثاني (اختياري)' : 'Second Phone (optional)'}
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="0770 xxx xxxx" className="bg-background text-left" dir="ltr" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {lang === 'ku' ? 'ساڵی لەدایکبوون (ئارەزوومەندانە)' : lang === 'ar' ? 'سنة الميلاد (اختياري)' : 'Birth Year (optional)'}
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder={lang === 'ku' ? 'نموونە: ٢٠٠٥' : lang === 'ar' ? 'مثال: 2005' : 'e.g. 2005'} className="bg-background" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Address */}
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {lang === 'ku' ? 'ناونیشان (ئارەزوومەندانە)' : lang === 'ar' ? 'العنوان (اختياري)' : 'Address (optional)'}
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder={lang === 'ku' ? 'شار، شوێن...' : lang === 'ar' ? 'المدينة، الحي...' : 'City, area...'} className="bg-background" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Notes */}
                   <FormField

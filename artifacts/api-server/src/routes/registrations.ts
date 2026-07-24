@@ -250,6 +250,34 @@ router.post("/", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// DELETE /api/registrations/:id  (requires Bearer token)
+// ---------------------------------------------------------------------------
+router.delete("/:id", async (req, res) => {
+  if (!validateToken(req.headers.authorization)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid registration ID" });
+    return;
+  }
+
+  const [deleted] = await db
+    .delete(registrationsTable)
+    .where(eq(registrationsTable.id, id))
+    .returning();
+
+  if (!deleted) {
+    res.status(404).json({ error: "Registration not found" });
+    return;
+  }
+
+  res.json({ ok: true });
+});
+
+// ---------------------------------------------------------------------------
 // PATCH /api/registrations/:id/approve  (requires Bearer token)
 // ---------------------------------------------------------------------------
 router.patch("/:id/approve", async (req, res) => {

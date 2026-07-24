@@ -56,6 +56,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /registrations/{id}:
+    delete:
+      operationId: deleteRegistration
+      tags: [admin]
+      summary: Delete a registration (requires Authorization Bearer token)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Registration deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /registrations/admin:
     get:
       operationId: listRegistrations

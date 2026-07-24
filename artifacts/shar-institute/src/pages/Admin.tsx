@@ -6,6 +6,7 @@ import {
   useGetRegistrationStats,
   useAdminLogin,
   useAdminLogout,
+  useDeleteRegistration,
   getListRegistrationsQueryKey,
   getGetRegistrationStatsQueryKey,
   setAuthTokenGetter,
@@ -16,7 +17,7 @@ import {
   Lock, ArrowLeft, LogOut,
   Download, Filter,
   Users, Sun, Moon, CalendarDays, BookOpen,
-  CheckCircle2, Loader2, Info
+  CheckCircle2, Loader2, Info, Trash2
 } from 'lucide-react';
 import {
   Dialog,
@@ -101,10 +102,13 @@ export default function Admin() {
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [shiftFilter, setShiftFilter] = useState<string>('all');
   const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [detailsReg, setDetailsReg] = useState<RegWithStatus | null>(null);
 
   const adminLogin = useAdminLogin();
   const adminLogout = useAdminLogout();
+  const deleteRegistration = useDeleteRegistration();
   const isAuthenticated = !!token;
 
   const { data: registrationsRaw, isLoading: loadingRegs } = useListRegistrations(
@@ -156,6 +160,26 @@ export default function Admin() {
     setToken(null);
     setPassword('');
     queryClient.clear();
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!token) return;
+    setDeletingId(id);
+    try {
+      await fetch(`/api/registrations/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      queryClient.invalidateQueries({
+        queryKey: getListRegistrationsQueryKey({
+          courseId: courseFilter !== 'all' ? courseFilter : undefined,
+          shift: shiftFilter !== 'all' ? (shiftFilter as 'morning' | 'evening') : undefined,
+        }),
+      });
+    } finally {
+      setDeletingId(null);
+      setConfirmDeleteId(null);
+    }
   };
 
   const handleApprove = async (id: number) => {
@@ -400,7 +424,7 @@ export default function Admin() {
                       </TableCell>
 
                       <TableCell className="text-start">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {reg.status !== 'approved' && (
                             <Button
                               size="sm"
@@ -415,15 +439,44 @@ export default function Admin() {
                               }
                             </Button>
                           )}
-                          {reg.metadata && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 text-xs font-bold gap-1.5"
+                            onClick={() => setDetailsReg(reg)}
+                          >
+                            <Info className="w-3 h-3" />
+                            زانیاری زیاتر
+                          </Button>
+                          {confirmDeleteId === reg.id ? (
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8 px-2 text-xs font-bold"
+                                disabled={deletingId === reg.id}
+                                onClick={() => handleDelete(reg.id)}
+                              >
+                                {deletingId === reg.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'دڵنیام'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2 text-xs"
+                                onClick={() => setConfirmDeleteId(null)}
+                              >
+                                پاشگەزبوون
+                              </Button>
+                            </div>
+                          ) : (
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
-                              title="تایبەتمەندیەکان"
-                              onClick={() => setDetailsReg(reg)}
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                              title="سڕینەوە"
+                              onClick={() => setConfirmDeleteId(reg.id)}
                             >
-                              <Info className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           )}
                         </div>
@@ -443,36 +496,61 @@ export default function Admin() {
         </div>
       </main>
 
-      {/* Metadata details dialog */}
+      {/* Details dialog — shows ALL fields */}
       <Dialog open={!!detailsReg} onOpenChange={(open) => { if (!open) setDetailsReg(null); }}>
-        <DialogContent className="sm:max-w-md" dir={dir}>
+        <DialogContent className="sm:max-w-lg" dir={dir}>
           <DialogHeader>
             <DialogTitle className="text-lg font-black">
               {detailsReg?.studentName} — {detailsReg?.courseName}
             </DialogTitle>
           </DialogHeader>
-          {detailsReg?.metadata && (() => {
-            let parsed: Record<string, unknown> = {};
-            try { parsed = JSON.parse(detailsReg.metadata); } catch { /* noop */ }
-            const entries = Object.entries(parsed).filter(([, v]) => v !== null && v !== undefined && v !== '');
+          {detailsReg && (() => {
+            // Parse metadata blob
+            let meta: Record<string, unknown> = {};
+            try { if (detailsReg.metadata) meta = JSON.parse(detailsReg.metadata); } catch { /* noop */ }
+
+            // Core fields always shown
+            const coreRows: { label: string; value: string }[] = [
+              { label: 'ناوی قوتابی',       value: detailsReg.studentName },
+              { label: 'ژ. تەلەفۆن',        value: detailsReg.phoneNumber },
+              { label: 'کۆرس',              value: detailsReg.courseName },
+              ...(detailsReg.teacherName ? [{ label: 'مامۆستا', value: detailsReg.teacherName }] : []),
+              { label: 'کاتی وانە',         value: detailsReg.shift === 'morning' ? t('adminMorningLabel') : t('adminEveningLabel') },
+              { label: 'زمان',              value: detailsReg.language === 'ku' ? t('adminLangKu') : detailsReg.language === 'ar' ? t('adminLangAr') : t('adminLangEn') },
+              { label: 'بەرواری تۆمارکردن', value: format(new Date(detailsReg.submittedAt), 'dd/MM/yyyy HH:mm') },
+              { label: 'دۆخ',              value: detailsReg.status === 'approved' ? t('adminApproved') : t('adminPending') },
+            ];
+
+            // Extra metadata rows
+            const metaRows = Object.entries(meta)
+              .filter(([, v]) => v !== null && v !== undefined && v !== '')
+              .map(([key, val]) => ({
+                label: META_LABELS[key] ?? key,
+                value: Array.isArray(val) ? val.join('، ') : String(val),
+              }));
+
+            const allRows = [...coreRows, ...metaRows];
+
+            // Notes last
+            if (detailsReg.notes) {
+              allRows.push({ label: 'تێبینی', value: detailsReg.notes });
+            }
+
             return (
-              <div className="flex flex-col gap-3 pt-2 max-h-[60vh] overflow-y-auto pr-1">
-                {entries.map(([key, val]) => (
-                  <div key={key} className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0">
-                    <span className="text-sm font-bold text-muted-foreground shrink-0">
-                      {META_LABELS[key] ?? key}
+              <div className="flex flex-col pt-2 max-h-[65vh] overflow-y-auto">
+                {allRows.map(({ label, value }, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start justify-between gap-4 py-2.5 border-b border-border last:border-0"
+                  >
+                    <span className="text-sm font-bold text-muted-foreground shrink-0 min-w-[120px]">
+                      {label}
                     </span>
                     <span className="text-sm text-foreground text-end">
-                      {Array.isArray(val) ? val.join('، ') : String(val)}
+                      {value}
                     </span>
                   </div>
                 ))}
-                {detailsReg.notes && (
-                  <div className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0">
-                    <span className="text-sm font-bold text-muted-foreground shrink-0">تێبینی</span>
-                    <span className="text-sm text-foreground text-end">{detailsReg.notes}</span>
-                  </div>
-                )}
               </div>
             );
           })()}

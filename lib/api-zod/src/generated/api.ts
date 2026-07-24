@@ -49,6 +49,18 @@ export const CreateRegistrationResponse = zod.object({
 
 
 /**
+ * @summary Delete a registration (requires Authorization Bearer token)
+ */
+export const DeleteRegistrationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteRegistrationResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+/**
  * @summary List all registrations (requires Authorization Bearer token)
  */
 export const ListRegistrationsQueryParams = zod.object({
